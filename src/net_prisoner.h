@@ -24,6 +24,7 @@
  * Common
  *********/
 
+
 /**
  * @brief Internal.
  * Allow the lib to log message (only if NETDEBUG == true)
@@ -37,7 +38,13 @@ void net_dbg(const char *format, ...);
  * Client only
  **************/
 
-void net_client_connexion();
+/**
+ * @brief open the connexion with the server
+ * @param port server port
+ * @param addrServer server address IP
+ * @return int sockfd : socket id
+ */
+int net_client_connexion(int port, char * addrServer[]);
 void net_client_betray();
 void net_client_collab();
 void net_client_acces_request();
