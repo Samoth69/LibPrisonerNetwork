@@ -1,8 +1,10 @@
 #include <stdio.h>
 
+#include "net_prisoner.h"
+
 int main()
 {
-	printf("Hello World!\n");
+	net_dbg("Hello World!\n");
 
 	return (0);
 }
