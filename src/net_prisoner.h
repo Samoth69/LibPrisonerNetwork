@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include <stdbool.h>
 
 #include <pthread.h>
 #include <sys/socket.h>
@@ -14,21 +16,35 @@
 //                     Settings
 // ----------------------------------------------
 
-#define DEBUG true
+/**
+ * @brief Enable logging for the net lib
+ * Set this to true to allow the lib to log messages to STDOUT
+ * It may be output usefull informations for debuging
+ */
+#define NETDEBUG true
+
 #define BUFFERSIZE 2048
 
 // ----------------------------------------------
 //                     Common
 // ----------------------------------------------
 
-void net_dbg(char text[]);
-
+/**
+ * @brief Internal.
+ * Allow the lib to log message (only if NETDEBUG == true)
+ * 
+ * @param format même fonctionnement que printf
+ * @param ... 
+ */
+void net_dbg(const char *format, ...);
 
 // ----------------------------------------------
 //                     Client
 // ----------------------------------------------
 
-/*** @brief socket file id */
+/**
+ * @brief socket file id 
+*/
 int net_client_sockfd;
 
 /**
