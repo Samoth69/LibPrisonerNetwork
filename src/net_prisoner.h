@@ -1,8 +1,15 @@
 #include <stdio.h>
 
 /**
+ * Settings
+ */
+#define DEBUG true
+
+/**
  * Common
  */
+
+void net_dbg(char text[]);
 
 /**
  * Client only
