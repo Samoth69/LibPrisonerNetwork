@@ -18,11 +18,12 @@
 
 void net_dbg(char text[]);
 
+
 /**
  * Client only
  */
 
-void net_client_connexion();
+int net_client_connexion(char * addrClient[]);
 void net_client_betray();
 void net_client_collab();
 void net_client_acces_request();
