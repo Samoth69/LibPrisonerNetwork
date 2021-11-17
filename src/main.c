@@ -4,7 +4,7 @@
 
 int main()
 {
-	net_dbg("Hello World!\n");
+	net_dbg("yolo");
 
 	return (0);
 }

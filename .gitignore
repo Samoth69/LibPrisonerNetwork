@@ -27,3 +27,8 @@ doxygen
 
 # inclus la config de Doxygen
 !configDoxygen
+
+# on ignore le main.c car dans le cadre du projet, ce fichier sert seulement à
+# test des fonctionnalités de la lib.
+# il ne servira pas en prod
+main.c
