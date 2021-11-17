@@ -1,0 +1,29 @@
+# exclus les fichiers sans extensions
+*
+!/**/
+!*.*
+
+# exclus les fichiers *.o (fichier de compilation)
+*.o
+
+# force l'intégration du makefile dans git
+!Makefile
+
+# ignore le dossier vscode
+.vscode
+
+# ignore les .exe
+*.exe
+
+# Ignore les fichiers EXCEL
+*.csv
+*.xlsx
+
+# exclus le dossier de documentation
+doxygen
+
+# enlève les fichiers dump en cas d'erreur
+*.stackdump
+
+# inclus la config de Doxygen
+!configDoxygen
