@@ -5,8 +5,8 @@
 
 int main()
 {	
-	char * addrClient = "127.0.0.1";  
-	int sockfd = net_client_connexion(&addrClient);
+	char * addrServer = "127.0.0.1";  
+	int sockfd = net_client_connexion(7799, &addrServer);
 
 	return (0);
 }

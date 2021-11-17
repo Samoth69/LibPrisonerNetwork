@@ -23,7 +23,13 @@ void net_dbg(char text[]);
  * Client only
  */
 
-int net_client_connexion(char * addrClient[]);
+/**
+ * @brief open the connexion with the server
+ * @param port server port
+ * @param addrServer server address IP
+ * @return int sockfd : socket id
+ */
+int net_client_connexion(int port, char * addrServer[]);
 void net_client_betray();
 void net_client_collab();
 void net_client_acces_request();
