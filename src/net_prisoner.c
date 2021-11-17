@@ -36,3 +36,8 @@ void net_client_betray();
 void net_client_collab();
 void net_client_acces_request();
 void net_client_disconnect();
+
+void net_dbg(char text[])
+{
+    printf("%s", text);
+}
