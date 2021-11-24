@@ -33,7 +33,6 @@ void net_dbg(const char *format, ...)
 
 /**
  * @brief 
- * 
  * @param ptr 
  * @return void* 
  */
@@ -44,7 +43,6 @@ void * threadProcess(void * ptr) {
         if (strncmp(buffer_in, "exit", 4) == 0) {
             break;
         }
-
         net_dbg("receive %d chars\n", len);
         net_dbg("%.*s\n", len, buffer_in);
     }
@@ -53,25 +51,24 @@ void * threadProcess(void * ptr) {
 }
 
 /**
- * @brief 
- * 
- * @param msg 
+ * @brief Reading thread creation
+ * @param msg message receive
  */
-void net_thread_process(char * msg[]) {
+void net_thread_process(char * msg) {
 
     pthread_t thread;
     int status = 0;
 
     // reading pthread creation
     pthread_create(&thread, 0, threadProcess, net_client_sockfd);
-    
     //write(connection->sock,"Main APP Still running",15);
+    
     pthread_detach(thread);
     do {
-        fgets(msg, 100, stdin);
+        fgets(msg, MSGLENGHT, stdin);
         //net_dbg("sending : %s\n", msg);
         status = write(net_client_sockfd, msg, strlen(msg));
-        //memset(msg,'\0',100);
+
     } while (status != -1);
 
 }
@@ -85,7 +82,7 @@ void net_thread_process(char * msg[]) {
  * @param addrServer server address IP
  * @param port server port
  */
-void net_client_connexion(char * addrServer[], int port) {
+void net_client_connexion(char * addrServer, int port) {
 
     struct sockaddr_in serverAddr;
 
@@ -95,8 +92,10 @@ void net_client_connexion(char * addrServer[], int port) {
     // Configure settings of the server address
     // Address family is Internet 
     serverAddr.sin_family = AF_INET;
+
     //Set port number, using htons function 
     serverAddr.sin_port = htons(port);
+
     //Set IP address to localhost
     serverAddr.sin_addr.s_addr = inet_addr(addrServer);
 
@@ -112,36 +111,30 @@ void net_client_connexion(char * addrServer[], int port) {
  * @brief The client want to betray the other player
  */
 void net_client_betray() {
-
     net_dbg("%d want to betray", net_client_sockfd);
     write(net_client_sockfd, 'B', 1);
-
 }
 
 /**
  * @brief The client want to collaborate the other player
  */
-void net_client_collab() {
-    
+void net_client_collab() {  
     net_dbg("%d want to collab", net_client_sockfd);
     write(net_client_sockfd, 'C', 1);
-    
 }
 
 /**
  * @brief The client want to play
  */
 void net_client_acces_request() {
-
     net_dbg("%d want to play", net_client_sockfd);
-    write(net_client_sockfd, 'A', 1);
+    write(net_client_sockfd, 'P', 1);
 }
 
 /**
  * @brief The client want to quit the game
  */
 void net_client_disconnect() {
-
     net_dbg("%d want to disconnect", net_client_sockfd);
     write(net_client_sockfd, 'D', 1);
 }

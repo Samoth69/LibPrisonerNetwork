@@ -23,7 +23,12 @@
  */
 #define NETDEBUG true
 
+/**
+ * @brief  max size of the buffer 
+ */
 #define BUFFERSIZE 2048
+
+#define MSGLENGHT 100
 
 // ----------------------------------------------
 //                     Common
@@ -52,7 +57,7 @@ int net_client_sockfd;
  * @param addrServer server address IP
  * @param port server port
  */
-void net_client_connexion(char * addrServer[], int port);
+void net_client_connexion(char * addrServer, int port);
 
 /**
  * @brief The client want to betray the other player
@@ -72,7 +77,6 @@ void net_client_acces_request();
 /**
  * @brief The client want to quit the game
  */
-
 void net_client_disconnect();
 
 // ----------------------------------------------
