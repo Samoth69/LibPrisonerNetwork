@@ -49,13 +49,30 @@ int net_client_sockfd;
 
 /**
  * @brief open the connexion with the server
- * @param port server port
  * @param addrServer server address IP
+ * @param port server port
  */
-void net_client_connexion(int port, char * addrServer[]);
+void net_client_connexion(char * addrServer[], int port);
+
+/**
+ * @brief The client want to betray the other player
+ */
 void net_client_betray();
+
+/**
+ * @brief The client want to collaborate the other player
+ */
 void net_client_collab();
+
+/**
+ * @brief The client want to play
+ */
 void net_client_acces_request();
+
+/**
+ * @brief The client want to quit the game
+ */
+
 void net_client_disconnect();
 
 // ----------------------------------------------
