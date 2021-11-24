@@ -36,7 +36,7 @@ void net_dbg(const char *format, ...)
  * @param ptr 
  * @return void* 
  */
-void * threadProcess(void * ptr) {
+void * _threadProcess(void * ptr) {
     char buffer_in[BUFFERSIZE];
     int len;
     while ((len = read(net_client_sockfd, buffer_in, BUFFERSIZE)) != 0) {
@@ -60,7 +60,7 @@ void net_thread_process(char * msg) {
     int status = 0;
 
     // reading pthread creation
-    pthread_create(&thread, 0, threadProcess, net_client_sockfd);
+    pthread_create(&thread, 0, _threadProcess, net_client_sockfd);
     //write(connection->sock,"Main APP Still running",15);
     
     pthread_detach(thread);
@@ -82,7 +82,7 @@ void net_thread_process(char * msg) {
  * @param addrServer server address IP
  * @param port server port
  */
-void net_client_connexion(char * addrServer, int port) {
+void net_client_connexion(char * addrServer[], int port) {
 
     struct sockaddr_in serverAddr;
 
@@ -112,7 +112,7 @@ void net_client_connexion(char * addrServer, int port) {
  */
 void net_client_betray() {
     net_dbg("%d want to betray", net_client_sockfd);
-    write(net_client_sockfd, 'B', 1);
+    write(net_client_sockfd, "B", 1);
 }
 
 /**
@@ -120,7 +120,7 @@ void net_client_betray() {
  */
 void net_client_collab() {  
     net_dbg("%d want to collab", net_client_sockfd);
-    write(net_client_sockfd, 'C', 1);
+    write(net_client_sockfd, "C", 1);
 }
 
 /**
@@ -128,7 +128,7 @@ void net_client_collab() {
  */
 void net_client_acces_request() {
     net_dbg("%d want to play", net_client_sockfd);
-    write(net_client_sockfd, 'P', 1);
+    write(net_client_sockfd, "P", 1);
 }
 
 /**
@@ -136,7 +136,7 @@ void net_client_acces_request() {
  */
 void net_client_disconnect() {
     net_dbg("%d want to disconnect", net_client_sockfd);
-    write(net_client_sockfd, 'D', 1);
+    write(net_client_sockfd, "D", 1);
 }
 
 // ----------------------------------------------

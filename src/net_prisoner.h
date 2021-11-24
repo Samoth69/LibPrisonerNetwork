@@ -57,7 +57,7 @@ int net_client_sockfd;
  * @param addrServer server address IP
  * @param port server port
  */
-void net_client_connexion(char * addrServer, int port);
+void net_client_connexion(char * addrServer[], int port);
 
 /**
  * @brief The client want to betray the other player
