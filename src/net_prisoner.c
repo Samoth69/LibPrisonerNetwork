@@ -33,9 +33,19 @@ void net_dbg(const char *format, ...)
     }
 }
 
-void *threadProcess(void *ptr)
+// ----------------------------------------------
+//                     Client
+// ----------------------------------------------
+
+/**
+ * @brief 
+ * @param ptr 
+ * @return void* 
+ */
+void * _threadProcess(void * ptr) 
 {
     char buffer_in[BUFFERSIZE];
+    net_client_sockfd = *((int *) ptr);
     int len;
     while ((len = read(net_client_sockfd, buffer_in, BUFFERSIZE)) != 0)
     {
@@ -43,31 +53,33 @@ void *threadProcess(void *ptr)
         {
             break;
         }
-
-        printf("receive %d chars\n", len);
-        printf("%.*s\n", len, buffer_in);
+        net_dbg("receive %d chars\n", len);
+        net_dbg("%.*s\n", len, buffer_in);
     }
     close(net_client_sockfd);
-    printf("client pthread ended, len=%d\n", len);
+    net_dbg("client pthread ended, len=%d\n", len);
 }
 
-void net_thread_process(char *msg[])
+/**
+ * @brief Reading thread creation
+ * @param msg message receive
+ */
+void net_thread_process(char * msg) 
 {
 
     pthread_t thread;
     int status = 0;
 
     // reading pthread creation
-    pthread_create(&thread, 0, threadProcess, net_client_sockfd);
-
+    pthread_create(&thread, 0, _threadProcess, &net_client_sockfd);
     //write(connection->sock,"Main APP Still running",15);
+    
     pthread_detach(thread);
-    do
-    {
-        fgets(msg, 100, stdin);
-        //printf("sending : %s\n", msg);
+    do {
+        fgets(msg, MSGLENGHT, stdin);
+        //net_dbg("sending : %s\n", msg);
         status = write(net_client_sockfd, msg, strlen(msg));
-        //memset(msg,'\0',100);
+
     } while (status != -1);
 }
 #pragma endregion Common
@@ -82,13 +94,11 @@ int net_client_sockfd;
 
 /**
  * @brief open the connexion with the server
- * @param port server port
  * @param addrServer server address IP
- * @return int sockfd : socket file id
+ * @param port server port
  */
-void net_client_connexion(int port, char *addrServer[])
+void net_client_connexion(char * addrServer, int port) 
 {
-
     struct sockaddr_in serverAddr;
 
     // Create the socket.
@@ -97,35 +107,53 @@ void net_client_connexion(int port, char *addrServer[])
     // Configure settings of the server address
     // Address family is Internet
     serverAddr.sin_family = AF_INET;
-    //Set port number, using htons function
+
+    //Set port number, using htons function 
     serverAddr.sin_port = htons(port);
+
     //Set IP address to localhost
     serverAddr.sin_addr.s_addr = inet_addr(addrServer);
 
     memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
 
     //Connect the socket to the server using the address
-    if (connect(net_client_sockfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) != 0)
-    {
-        printf("Fail to connect to server");
+    if (connect(net_client_sockfd, (struct sockaddr *) &serverAddr, sizeof (serverAddr)) != 0) {
+        net_dbg("Fail to connect to server");
         exit(-1);
     };
 }
 
-void net_client_betray()
-{
-    printf("%d want to betray", net_client_sockfd);
-    write(net_client_sockfd, 'B', 1);
+/**
+ * @brief The client want to betray the other player
+ */
+void net_client_betray() {
+    net_dbg("%d want to betray", net_client_sockfd);
+    write(net_client_sockfd, "B", 1);
 }
 
-void net_client_collab()
-{
-    printf("%d want to collab", net_client_sockfd);
-    write(net_client_sockfd, 'C', 1);
+/**
+ * @brief The client want to collaborate the other player
+ */
+void net_client_collab() {  
+    net_dbg("%d want to collab", net_client_sockfd);
+    write(net_client_sockfd, "C", 1);
 }
 
-void net_client_acces_request();
-void net_client_disconnect();
+/**
+ * @brief The client want to play
+ */
+void net_client_acces_request() {
+    net_dbg("%d want to play", net_client_sockfd);
+    write(net_client_sockfd, "P", 1);
+}
+
+/**
+ * @brief The client want to quit the game
+ */
+void net_client_disconnect() {
+    net_dbg("%d want to disconnect", net_client_sockfd);
+    write(net_client_sockfd, "D", 1);
+}
 #pragma endregion Client
 
 // ----------------------------------------------
