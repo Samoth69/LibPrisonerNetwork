@@ -1,14 +1,15 @@
-#include <stdio.h>		
-#include "net_prisoner.h"
-
+#include <stdlib.h>
 #include "net_prisoner.h"
 
 int main()
 {
 	net_dbg("yolo");
-{	
-	char * addrServer = "127.0.0.1";  
-	net_client_connexion(7799, &addrServer);
+	net_server_init();
+
+	while(true)
+	{
+		sleep(1);
+	}
 
 	return (EXIT_SUCCESS);
 }
