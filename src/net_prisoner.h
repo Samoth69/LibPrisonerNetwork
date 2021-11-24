@@ -53,11 +53,17 @@ void net_dbg(const char *format, ...);
 int net_client_sockfd;
 
 /**
+ * @brief Reading thread creation
+ * @param msg message receive
+ */
+void net_thread_process(char * msg);
+
+/**
  * @brief open the connexion with the server
  * @param addrServer server address IP
  * @param port server port
  */
-void net_client_connexion(char * addrServer[], int port);
+void net_client_connexion(char * addrServer, int port);
 
 /**
  * @brief The client want to betray the other player

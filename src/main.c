@@ -5,8 +5,8 @@ int main()
 {	
 
 	// création de la connexion
-	char addrServer = "127.0.0.1\0";  
-	net_client_connexion(&addrServer, 7799);
+	char * addrServer = "127.0.0.1\0";  
+	net_client_connexion(addrServer, 7799);
 
 	// envoie d'un message
 	char msg[MSGLENGHT];

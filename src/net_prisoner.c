@@ -31,13 +31,20 @@ void net_dbg(const char *format, ...)
     }
 }
 
+
+// ----------------------------------------------
+//                     Client
+// ----------------------------------------------
+
 /**
  * @brief 
  * @param ptr 
  * @return void* 
  */
 void * _threadProcess(void * ptr) {
+
     char buffer_in[BUFFERSIZE];
+    net_client_sockfd = *((int *) ptr);
     int len;
     while ((len = read(net_client_sockfd, buffer_in, BUFFERSIZE)) != 0) {
         if (strncmp(buffer_in, "exit", 4) == 0) {
@@ -60,7 +67,7 @@ void net_thread_process(char * msg) {
     int status = 0;
 
     // reading pthread creation
-    pthread_create(&thread, 0, _threadProcess, net_client_sockfd);
+    pthread_create(&thread, 0, _threadProcess, &net_client_sockfd);
     //write(connection->sock,"Main APP Still running",15);
     
     pthread_detach(thread);
@@ -73,16 +80,12 @@ void net_thread_process(char * msg) {
 
 }
 
-// ----------------------------------------------
-//                     Client
-// ----------------------------------------------
-
 /**
  * @brief open the connexion with the server
  * @param addrServer server address IP
  * @param port server port
  */
-void net_client_connexion(char * addrServer[], int port) {
+void net_client_connexion(char * addrServer, int port) {
 
     struct sockaddr_in serverAddr;
 
