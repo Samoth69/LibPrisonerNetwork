@@ -28,6 +28,11 @@
  */
 #define BUFFERSIZE 2048
 
+/**
+ * @brief Max openned connections for the server
+ */
+#define MAXSIMULTANEOUSCLIENTS 100
+
 #define MSGLENGHT 100
 
 // ----------------------------------------------
@@ -50,7 +55,7 @@ void net_dbg(const char *format, ...);
 /**
  * @brief socket file id 
 */
-int net_client_sockfd;
+extern int net_client_sockfd;
 
 /**
  * @brief Reading thread creation
@@ -89,10 +94,29 @@ void net_client_disconnect();
 //                     Server
 // ----------------------------------------------
 
+/**
+ * @brief Structure for keeping track of active connections
+ * 
+ */
+typedef struct {
+    int sockfd;
+    struct sockaddr address;
+    int addr_len;
+    int index;
+} connection_t;
+
 void net_server_init();
 void net_server_wait();
 void net_server_game_start();
 void net_server_round_end();
 void net_server_match_end();
+
+//private
+void _net_server_connection_add(connection_t *connection);
+void _net_server_connection_del(connection_t *connection);
+int _net_server_create_server_socket();
+void *_net_server_main_pthread(int sockfd);
+void *_net_server_thread_process(void *ptr);
+
 
 #endif /* NET_PRISONER_H */

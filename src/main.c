@@ -1,8 +1,11 @@
 #include <stdio.h>		
+#include <stdlib.h>
 #include "net_prisoner.h"
 
 int main()
 {	
+  net_dbg("yolo");
+	net_server_init();
 
 	// création de la connexion
 	char * addrServer = "127.0.0.1\0";  
