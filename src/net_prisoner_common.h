@@ -36,15 +36,11 @@
 #define NETDEBUG true
 
 /**
- * @brief if this is true, the lib will make sure only one function provided to
- * user will be runned at a time
+ * @brief if this is true:
+ * The functions provided by the user of the lib (by means of net_*****_set_func_blabla(...))
+ * Will only be runned once at a time
  */
 #define THREAD_SAFETY true
-
-/**
- * @brief  max size of the buffer 
- */
-#define BUFFERSIZE 2048
 
 /**
  * @brief Max openned connections for the server
