@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include "net_prisoner.h"
 
+int counter;
+
 void new_client(int client_id)
 {
 	counter++;

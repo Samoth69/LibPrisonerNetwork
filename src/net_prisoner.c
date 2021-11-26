@@ -101,7 +101,7 @@ void *_net_client_threadProcess(void *ptr)
         }
         _net_common_dbg("client %d receive %d chars\n", net_client_sockfd, len);
         _net_common_dbg("%.*s\n", len, buffer_in);
-        event(buffer_in, len);
+        _net_client_event(buffer_in, len);
     }
     close(net_client_sockfd);
     _net_common_dbg("client pthread ended, len=%d\n", len);
