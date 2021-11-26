@@ -257,6 +257,7 @@ void *_net_server_thread_process(void *ptr)
     char buffer_in[BUFFERSIZE];
     memset(buffer_in, '\0', BUFFERSIZE);
     int len;
+    bool quit = false;
 
     _net_server_connection_t *connection;
 
@@ -274,48 +275,10 @@ void *_net_server_thread_process(void *ptr)
 
     while ((len = read(connection->sockfd, buffer_in, BUFFERSIZE)) > 0)
     {
+        if (quit)
+            break;
 
-        // if (strncmp(buffer_in, "bye", 3) == 0)
-        // {
-        //     break;
-        // }
-        //#if NETDEBUG
-        // printf("DEBUG-----------------------------------------------------------\n");
-        // printf("len : %i\n", len);
-        // printf("Buffer : %.*s\n", len, buffer_in);
-        // printf("----------------------------------------------------------------\n");
         _net_common_dbg("Received from client #%d length %d\n", connection->client_id, len);
-        //#endif
-        // strcpy(buffer_out, "\nServer Echo : ");
-        // strncat(buffer_out, buffer_in, len);
-
-        // if (buffer_in[0] == '@')
-        // {
-        //     for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
-        //     {
-        //         if (_connections[i] != NULL)
-        //         {
-        //             write(_connections[i]->sockfd, buffer_out, strlen(buffer_out));
-        //         }
-        //     }
-        // }
-        // else if (buffer_in[0] == '#')
-        // {
-        //     int client = 0;
-        //     int read = sscanf(buffer_in, "%*[^0123456789]%d ", &client);
-        //     for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
-        //     {
-        //         if (client == _connections[i]->index)
-        //         {
-        //             write(_connections[i]->sockfd, buffer_out, strlen(buffer_out));
-        //             break;
-        //         } //no client found ? : we dont care !!
-        //     }
-        // }
-        // else
-        // {
-        //     write(connection->sockfd, buffer_out, strlen(buffer_out));
-        // }
 
         _net_common_netpacket packet;
         memcpy(&packet, &buffer_in, len);
@@ -333,6 +296,7 @@ void *_net_server_thread_process(void *ptr)
         case ACTION_QUIT:
             _net_common_dbg("received ACTION_QUIT from client %d\n", connection->client_id);
             (*_net_server_func_client_disconnect)(connection->client_id);
+            quit = true;
             break;
         case SCREEN_WAITING:
             _net_common_dbg("ERROR: received SCREEN_WAITING from client %d\n", connection->client_id);
@@ -352,7 +316,7 @@ void *_net_server_thread_process(void *ptr)
         //clear input buffer
         memset(buffer_in, '\0', BUFFERSIZE);
     }
-    printf("Connection to client %i ended \n", connection->index);
+    _net_common_dbg("Connection to client %i (id %d) ended \n", connection->index, connection->client_id);
     close(connection->sockfd);
     _net_server_connection_del(connection);
     free(connection);

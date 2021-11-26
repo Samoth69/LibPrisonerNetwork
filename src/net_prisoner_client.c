@@ -95,6 +95,7 @@ void _net_client_event(_net_common_netpacket packet) {
         default:
             _net_common_dbg("Unknown message type, do you have the latest version of the lib ?\n");
             break;
+        }
 }
 
 /**
