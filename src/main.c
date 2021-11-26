@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include "net_prisoner.h"
 
-void *trahir(int client)
+void trahir(int client, ulong tps)
 {
 
 }
@@ -24,19 +24,17 @@ int main()
 {
 	net_dbg("yolo");
 	net_server_init("0.0.0.0", 7799);
-	net_server_set_trahir(*trahir);
+	//net_server_set_func_betray(&trahir);
 
 
 	// création de la connexion
-	char *addrServer = "127.0.0.1\0";
-	net_client_connexion(addrServer, 7799);
+	char *addrServer = "0.0.0.0";
+	net_client_init(addrServer, 7799);
 
 	// envoie d'un message
 	net_client_betray();
-	
-	// écoute d'une réponse
-	char * returned = net_client_listening_server();
-	printf("received: %s\n", returned);
+
+	while(1){};
 
 	return (EXIT_SUCCESS);
 }

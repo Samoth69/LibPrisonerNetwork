@@ -77,12 +77,6 @@ extern int net_client_sockfd;
 void *_net_client_threadProcess(void *ptr);
 
 /**
- * @brief Reading thread creation
- * @return char* message receive
- */
-char * net_client_listening_server();
-
-/**
  * @brief open the connexion with the server
  * @param addrServer server address IP
  * @param port server port

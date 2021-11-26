@@ -51,6 +51,23 @@ void net_dbg(const char *format, ...)
  */
 int net_client_sockfd;
 
+
+void *_net_client_func_waiting_screen;
+void (*_net_client_func_round_end)(bool, int);
+
+
+void *net_client_set_func_waiting_screen(void (*f)) 
+{
+    _net_client_func_waiting_screen = f;
+}
+
+
+void _net_client_event(char * buffer_in, int length) {
+    if (strcmp(buffer_in, "W")) {
+        *_net_client_func_waiting_screen;
+    }
+}
+
 /**
  * @brief read and display received messages
  * @param ptr the net_client_sockfd
@@ -67,35 +84,12 @@ void *_net_client_threadProcess(void *ptr)
         {
             break;
         }
-        net_dbg("receive %d chars\n", len);
+        net_dbg("client %d receive %d chars\n", net_client_sockfd, len);
         net_dbg("%.*s\n", len, buffer_in);
+        event(buffer_in, len);
     }
     close(net_client_sockfd);
     net_dbg("client pthread ended, len=%d\n", len);
-}
-
-/**
- * @brief Reading thread creation
- * @return char* message receive
- */
-char * net_client_listening_server()
-{
-    char * response;
-    pthread_t thread;
-    int status = 0;
-
-    // reading pthread creation
-    pthread_create(&thread, 0, _net_client_threadProcess, &net_client_sockfd);
-
-    pthread_detach(thread);
-    do
-    {
-        fgets(response, MSGLENGHT, stdin);
-        status = write(net_client_sockfd, response, strlen(response));
-
-    } while (status != -1);
-
-    return response;
 }
 
 /**
@@ -106,6 +100,7 @@ char * net_client_listening_server()
 void net_client_init(char *addrServer, int port)
 {
     struct sockaddr_in serverAddr;
+    pthread_t thread;
 
     // Create the socket.
     net_client_sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -128,6 +123,10 @@ void net_client_init(char *addrServer, int port)
         net_dbg("Fail to connect to server");
         exit(-1);
     };
+
+    // reading pthread creation
+    pthread_create(&thread, 0, _net_client_threadProcess, &net_client_sockfd);
+    pthread_detach(thread);
 }
 
 /**
@@ -136,7 +135,7 @@ void net_client_init(char *addrServer, int port)
 void net_client_betray()
 {
     net_dbg("%d want to betray\n", net_client_sockfd);
-    write(net_client_sockfd, "B", 1);
+    write(net_client_sockfd, "B", 2);
 }
 
 /**
@@ -145,7 +144,7 @@ void net_client_betray()
 void net_client_collab()
 {
     net_dbg("%d want to collab\n", net_client_sockfd);
-    write(net_client_sockfd, "C", 1);
+    write(net_client_sockfd, "C", 2);
 }
 
 /**
@@ -154,7 +153,7 @@ void net_client_collab()
 void net_client_disconnect()
 {
     net_dbg("%d want to disconnect", net_client_sockfd);
-    write(net_client_sockfd, "D", 1);
+    write(net_client_sockfd, "D", 2);
 }
 #pragma endregion Client
 
@@ -350,15 +349,6 @@ void *_net_server_thread_process(void *ptr)
         printf("----------------------------------------------------------------\n");
 #endif
         strcpy(buffer_out, "\nServer Echo : ");
-
-
-        /**
-         * @warning tmp
-         */
-        write(connection->sockfd, "B", 1);
-
-
-
         strncat(buffer_out, buffer_in, len);
 
         if (buffer_in[0] == '@')
