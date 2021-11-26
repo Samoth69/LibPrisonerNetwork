@@ -86,12 +86,12 @@ void _net_client_event(_net_common_netpacket packet)
     case SCREEN_WAITING:
 
         _net_common_dbg("Client socket %d received SCREEN_WAITING from server\n", net_client_sockfd);
-        (*_net_client_func_waiting_screen);
+        (*_net_client_func_waiting_screen)();
         break;
 
     case SCREEN_CHOICE:
         _net_common_dbg("Client socket %d received SCREEN_CHOICE from server\n", net_client_sockfd);
-        (*_net_client_func_choice_screen);
+        (*_net_client_func_choice_screen)();
         break;
 
     case SCREEN_SCORE:
@@ -117,14 +117,11 @@ void *_net_client_threadProcess(void *ptr)
 
     net_client_sockfd = *((int *)ptr);
     int len;
-    while ((len = read(net_client_sockfd, &packet, sizeof(packet))) != 0)
+    while ((len = read(net_client_sockfd, &packet, sizeof(packet))) > 0)
     {
-        if (strncmp(buffer_in, "exit", 4) == 0)
-        {
-            break;
-        }
         _net_common_dbg("client %d receive %d\n", net_client_sockfd, sizeof(packet));
         _net_client_event(packet);
+        //memset(&packet, '\0', len);
     }
     close(net_client_sockfd);
     _net_common_dbg("client pthread ended, len=%d\n", len);

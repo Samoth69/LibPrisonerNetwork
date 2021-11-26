@@ -36,9 +36,9 @@
 #define NETDEBUG true
 
 /**
- * @brief if this is true:
- * The functions provided by the user of the lib (by means of net_*****_set_func_blabla(...))
- * Will only be runned once at a time
+ * @brief Used to protect lib user function from multiple executions by different thread
+ * if false, multithreading protection should be implemented by lib user to prevent
+ * concurency issues
  */
 #define THREAD_SAFETY true
 

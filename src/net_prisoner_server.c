@@ -42,6 +42,13 @@ bool _net_server_exit = false;
  */
 int _net_server_client_id_counter = 0;
 
+/**
+ * @brief Use to protect lib user function from multiple executions
+ * from different thread
+ */
+sem_t _lock_user_function;
+
+// functions provided by the user of the lib
 void (*_net_server_func_new_client)(int);
 void (*_net_server_func_client_disconnect)(int);
 void (*_net_server_func_cooperate)(int, ulong);
@@ -53,6 +60,8 @@ void (*_net_server_func_betray)(int, ulong);
 void net_server_init(char *ip, int port)
 {
     _net_common_init();
+    sem_init(&_lock_user_function, PTHREAD_PROCESS_SHARED, 1);
+
     for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
     {
         _connections[i] = NULL;
@@ -100,7 +109,10 @@ void net_server_send_screen_waiting(int client)
 {
     _net_common_netpacket msg;
     msg.msg_type = SCREEN_WAITING;
+    // if (THREAD_SAFETY)
+    //     sem_wait(&_lock_user_function);
     _net_server_send_message(&msg, client);
+    // sem_post(&_lock_user_function);
 }
 
 void net_server_send_screen_choice(int client)
@@ -260,6 +272,7 @@ void *_net_server_thread_process(void *ptr)
     bool quit = false;
 
     _net_server_connection_t *connection;
+    _net_common_netpacket packet;
 
     if (!ptr)
         pthread_exit(0);
@@ -278,9 +291,13 @@ void *_net_server_thread_process(void *ptr)
         if (quit)
             break;
 
-        _net_common_dbg("Received from client #%d length %d\n", connection->client_id, len);
+        if (len != sizeof(packet))
+        {
+            _net_common_dbg("WARN: Invalid packet received, ignoring\n");
+            continue;
+        }
 
-        _net_common_netpacket packet;
+        _net_common_dbg("Received from client #%d length %d\n", connection->client_id, len);
         memcpy(&packet, &buffer_in, len);
 
         switch (packet.msg_type)
@@ -347,6 +364,23 @@ void _net_server_send_message(_net_common_netpacket *msg, int client_id)
     }
     if (!found)
         _net_common_dbg("WARNING: client id %d not found, ignoring\n", client_id);
+}
+
+void _net_server_call_new_client(int client)
+{
+
+}
+void _net_server_call_client_disconnect(int client)
+{
+
+}
+void _net_server_call_cooperate(int client, ulong delay)
+{
+
+}
+void _net_server_call_betray(int client, ulong delay)
+{
+    
 }
 
 #pragma endregion Server

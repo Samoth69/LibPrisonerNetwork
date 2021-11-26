@@ -140,5 +140,9 @@ void *_net_server_main_pthread(int sockfd);
 void *_net_server_thread_process(void *ptr);
 
 void _net_server_send_message(_net_common_netpacket *msg, int client_id);
+void _net_server_call_new_client(int client);
+void _net_server_call_client_disconnect(int client);
+void _net_server_call_cooperate(int client, ulong delay);
+void _net_server_call_betray(int client, ulong delay);
 
 #endif /* NET_PRISONER_SERVER_H */
