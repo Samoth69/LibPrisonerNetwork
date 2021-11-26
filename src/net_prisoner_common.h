@@ -73,7 +73,7 @@ void _net_common_init();
 /**
  * @brief define all the messages type exchanged between the client and the server
  */
-enum msg_type {
+enum _net_common_msg_type {
     /**
      * @brief the client betray the other
      */
@@ -98,7 +98,7 @@ enum msg_type {
      * @brief the client need to display the score,
      * int score contain the score 
      */
-    SCREEN_SCORE = 6
+    SCREEN_SCORE = 6,
 };
 
 /**
@@ -108,7 +108,7 @@ typedef struct {
     /**
      * @brief type of the message
      */
-    enum msg_type;
+    enum _net_common_msg_type msg_type;
 
     /**
      * @brief network time exec
@@ -124,6 +124,6 @@ typedef struct {
      * @brief true if the player win
      */
     bool has_win;
-} comm;
+} _net_common_netpacket;
 
 #endif /* NET_PRISONER_COMMON_H */

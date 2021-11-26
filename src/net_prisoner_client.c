@@ -16,21 +16,73 @@
  */
 int net_client_sockfd;
 
-
+/**
+ * @brief the function used by the library
+ * refering to the defined one by the client
+ * to display the waiting screen
+ */
 void (*_net_client_func_waiting_screen)();
-void (*_net_client_func_round_end)(bool, int);
 
+/**
+ * @brief the function used by the library
+ * refering to the defined one by the client
+ * to display the choice screen
+ */
+void (*_net_client_func_choice_screen)();
 
-void *net_client_set_func_waiting_screen(void (*f)()) 
+/**
+ * @brief the function used by the library
+ * refering to the defined one by the client
+ * to display the score screen
+ */
+void (*_net_client_func_score_screen)(bool, int);
+
+/**
+ * @brief define the function using the defined
+ * one by the client to display the wainting screen
+ * @param f the client function 
+ */
+void * net_client_set_func_waiting_screen(void (*f)()) 
 {
     _net_client_func_waiting_screen = f;
 }
 
+/**
+ * @brief define the function using the defined
+ * one by the client to display the choice screen
+ * @param f the client function 
+ */
+void * net_client_set_func_choice_screen(void (*f)()) 
+{
+    _net_client_func_choice_screen = f;
+}
 
-void _net_client_event(char * buffer_in, int length) {
-    if (strcmp(buffer_in, "W")) {
+/**
+ * @brief define the function using the defined
+ * one by the client to display the score screen
+ * @param f the client function 
+ */
+void * net_client_set_func_score_screen(void (*f)()) 
+{
+    _net_client_func_score_screen = f;
+}
+
+/**
+ * @brief call the right function 
+ * depends on the packet received from the server
+ * @param packet the packet receive
+ */
+void _net_client_event(_net_common_netpacket packet) {
+
+    if (packet.msg_type == SCREEN_WAITING) {
         *_net_client_func_waiting_screen;
-    }
+
+    } else if (packet.msg_type == SCREEN_CHOICE) {
+        *_net_client_func_choice_screen;
+
+    } else if (packet.msg_type == SCREEN_SCORE) {
+        (*_net_client_func_score_screen)(packet.has_win, packet.score);
+    } 
 }
 
 /**
@@ -41,17 +93,18 @@ void _net_client_event(char * buffer_in, int length) {
 void *_net_client_threadProcess(void *ptr)
 {
     char buffer_in[BUFFERSIZE];
+    _net_common_netpacket packet;
+    
     net_client_sockfd = *((int *)ptr);
     int len;
-    while ((len = read(net_client_sockfd, buffer_in, BUFFERSIZE)) != 0)
+    while ((len = read(net_client_sockfd, &packet, sizeof(packet))) != 0)
     {
         if (strncmp(buffer_in, "exit", 4) == 0)
         {
             break;
-        }
-        _net_common_dbg("client %d receive %d chars\n", net_client_sockfd, len);
-        _net_common_dbg("%.*s\n", len, buffer_in);
-        _net_client_event(buffer_in, len);
+        }   
+        _net_common_dbg("client %d receive %.*s\n", net_client_sockfd, sizeof(packet),  packet);
+        _net_client_event(packet, len);
     }
     close(net_client_sockfd);
     _net_common_dbg("client pthread ended, len=%d\n", len);
@@ -108,8 +161,10 @@ void net_client_init(char *addrServer, int port)
  */
 void net_client_betray() 
 {
+    _net_common_netpacket packet;
+    packet.msg_type = ACTION_BETRAY;
+    write(net_client_sockfd, &packet, sizeof(packet));
     _net_common_dbg("%d want to betray", net_client_sockfd);
-    write(net_client_sockfd, "B", 2);
 }
 
 /**
@@ -117,16 +172,10 @@ void net_client_betray()
  */
 void net_client_collab() 
 {  
-    _net_common_dbg("%d want to collab", net_client_sockfd);
-    write(net_client_sockfd, "C", 2);
-}
-
-/**
- * @brief The client want to play
- */
-void net_client_acces_request() {
-    _net_common_dbg("%d want to play", net_client_sockfd);
-    write(net_client_sockfd, "P", 2);
+    _net_common_netpacket packet;
+    packet.msg_type = ACTION_COLLAB;
+    write(net_client_sockfd, &packet, sizeof(packet));
+    _net_common_dbg("%d want to collab", net_client_sockfd);    
 }
 
 /**
@@ -134,7 +183,9 @@ void net_client_acces_request() {
  */
 void net_client_disconnect() 
 {
-    _net_common_dbg("%d want to disconnect", net_client_sockfd);
-    write(net_client_sockfd, "D", 2);
+    _net_common_netpacket packet;
+    packet.msg_type = ACTION_QUIT;
+    write(net_client_sockfd, &packet, sizeof(packet));
+    _net_common_dbg("%d want to quit", net_client_sockfd);
 }
 #pragma endregion Client
