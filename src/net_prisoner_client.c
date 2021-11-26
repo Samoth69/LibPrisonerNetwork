@@ -74,15 +74,27 @@ void * net_client_set_func_score_screen(void (*f)())
  */
 void _net_client_event(_net_common_netpacket packet) {
 
-    if (packet.msg_type == SCREEN_WAITING) {
-        *_net_client_func_waiting_screen;
+        switch (packet.msg_type)
+        {
+        case SCREEN_WAITING:
 
-    } else if (packet.msg_type == SCREEN_CHOICE) {
-        *_net_client_func_choice_screen;
+            _net_common_dbg("ERROR: received SCREEN_WAITING from client %d\n", net_client_sockfd);
+            (*_net_client_func_waiting_screen);
+            break;
 
-    } else if (packet.msg_type == SCREEN_SCORE) {
-        (*_net_client_func_score_screen)(packet.has_win, packet.score);
-    } 
+        case SCREEN_CHOICE:
+            _net_common_dbg("ERROR: received SCREEN_CHOICE from client %d\n", net_client_sockfd);
+            (*_net_client_func_choice_screen);
+            break;
+
+        case SCREEN_SCORE:
+            _net_common_dbg("ERROR: received SCREEN_SCORE from client %d\n", net_client_sockfd);
+            (*_net_client_func_score_screen)(packet.has_win, packet.score);
+            break;
+
+        default:
+            _net_common_dbg("Unknown message type, do you have the latest version of the lib ?\n");
+            break;
 }
 
 /**
@@ -103,7 +115,7 @@ void *_net_client_threadProcess(void *ptr)
         {
             break;
         }   
-        _net_common_dbg("client %d receive %.*s\n", net_client_sockfd, sizeof(packet),  packet);
+        _net_common_dbg("client %d receive %d\n", net_client_sockfd, sizeof(packet));
         _net_client_event(packet);
     }
     close(net_client_sockfd);
