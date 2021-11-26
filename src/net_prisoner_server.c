@@ -109,10 +109,7 @@ void net_server_send_screen_waiting(int client)
 {
     _net_common_netpacket msg;
     msg.msg_type = SCREEN_WAITING;
-    // if (THREAD_SAFETY)
-    //     sem_wait(&_lock_user_function);
     _net_server_send_message(&msg, client);
-    // sem_post(&_lock_user_function);
 }
 
 void net_server_send_screen_choice(int client)
@@ -154,8 +151,7 @@ void _net_server_connection_add(_net_server_connection_t *connection)
         perror("Too much simultaneous connections");
         exit(-5);
     }
-
-    (*_net_server_func_new_client)(_net_server_client_id_counter);
+    _net_server_call_new_client(_net_server_client_id_counter);
     _net_server_client_id_counter++;
 }
 
@@ -166,16 +162,23 @@ void _net_server_connection_add(_net_server_connection_t *connection)
  */
 void _net_server_connection_del(_net_server_connection_t *connection)
 {
+    bool found = false;
+
     for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
     {
         if (_connections[i] == connection)
         {
             _connections[i] = NULL;
-            return;
+            found = true;
+            break;
         }
     }
-    perror("Connection not in pool ");
-    exit(-5);
+    if (!found)
+    {
+        perror("Connection not in pool ");
+        exit(-5);
+    }
+    _net_server_call_client_disconnect(connection->client_id);
 }
 
 /**
@@ -304,15 +307,15 @@ void *_net_server_thread_process(void *ptr)
         {
         case ACTION_BETRAY:
             _net_common_dbg("received ACTION_BETRAY from client %d\n", connection->client_id);
-            (*_net_server_func_betray)(connection->client_id, packet.delay);
+            _net_server_call_betray(connection->client_id, packet.delay);
             break;
         case ACTION_COLLAB:
             _net_common_dbg("received ACTION_COLLAB from client %d\n", connection->client_id);
-            (*_net_server_func_cooperate)(connection->client_id, packet.delay);
+            _net_server_call_cooperate(connection->client_id, packet.delay);
             break;
         case ACTION_QUIT:
             _net_common_dbg("received ACTION_QUIT from client %d\n", connection->client_id);
-            (*_net_server_func_client_disconnect)(connection->client_id);
+            _net_server_func_client_disconnect(connection->client_id);
             quit = true;
             break;
         case SCREEN_WAITING:
@@ -366,21 +369,58 @@ void _net_server_send_message(_net_common_netpacket *msg, int client_id)
         _net_common_dbg("WARNING: client id %d not found, ignoring\n", client_id);
 }
 
+/**
+ * @brief Trigger call new client on lib user side
+ * 
+ * @param client new client id
+ */
 void _net_server_call_new_client(int client)
 {
-
+    if (THREAD_SAFETY)
+        sem_wait(&_lock_user_function);
+    (*_net_server_func_new_client)(client);
+    sem_post(&_lock_user_function);
 }
+
+/**
+ * @brief Trigger call client disconnect on lib user side
+ * 
+ * @param client client id of the disconnecting client
+ */
 void _net_server_call_client_disconnect(int client)
 {
-
+    if (THREAD_SAFETY)
+        sem_wait(&_lock_user_function);
+    (*_net_server_func_client_disconnect)(client);
+    sem_post(&_lock_user_function);
 }
+
+/**
+ * @brief trigger call on cooperate on lib user side
+ * 
+ * @param client client id
+ * @param delay time spend answering the question
+ */
 void _net_server_call_cooperate(int client, ulong delay)
 {
-
+    if (THREAD_SAFETY)
+        sem_wait(&_lock_user_function);
+    (*_net_server_func_cooperate)(client, delay);
+    sem_post(&_lock_user_function);
 }
+
+/**
+ * @brief trigger call on betray on lib user side
+ * 
+ * @param client client id
+ * @param delay time spend answering the question
+ */
 void _net_server_call_betray(int client, ulong delay)
 {
-    
+    if (THREAD_SAFETY)
+        sem_wait(&_lock_user_function);
+    (*_net_server_func_betray)(client, delay);
+    sem_post(&_lock_user_function);
 }
 
 #pragma endregion Server

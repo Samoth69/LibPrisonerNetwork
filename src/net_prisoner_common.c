@@ -63,4 +63,8 @@ void _net_common_init()
 {
     // initialize the semaphore before use
     sem_init(&_lock_log_dbg, PTHREAD_PROCESS_SHARED, 1);
+    if (THREAD_SAFETY)
+    {
+        _net_common_dbg("Thread safety enabled");
+    }
 }
