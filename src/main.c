@@ -52,9 +52,9 @@ void client_choice_screen()
 	printf("client need to display the choice screen");
 }
 
-void client_score_screen(bool as_win, int score) 
+void client_score_screen(bool has_win, int score) 
 {
-	printf("client need to display the score screen, the client win : %d, score = %d", as_win, score);
+	printf("client need to display the score screen, the client win : %d, score = %d", has_win, score);
 }
 
 int main()
