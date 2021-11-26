@@ -255,9 +255,9 @@ void *_net_server_main_pthread(int sockfd)
 void *_net_server_thread_process(void *ptr)
 {
     char buffer_in[BUFFERSIZE];
-    char buffer_out[BUFFERSIZE];
-
+    memset(buffer_in, '\0', BUFFERSIZE);
     int len;
+
     _net_server_connection_t *connection;
 
     if (!ptr)
@@ -279,13 +279,13 @@ void *_net_server_thread_process(void *ptr)
         // {
         //     break;
         // }
-//#if NETDEBUG
+        //#if NETDEBUG
         // printf("DEBUG-----------------------------------------------------------\n");
         // printf("len : %i\n", len);
         // printf("Buffer : %.*s\n", len, buffer_in);
         // printf("----------------------------------------------------------------\n");
-        _net_common_dbg("Received from client %d length %d msg: %s\n", connection->client_id, sizeof(buffer_in), buffer_in);
-//#endif
+        _net_common_dbg("Received from client #%d length %d\n", connection->client_id, len);
+        //#endif
         // strcpy(buffer_out, "\nServer Echo : ");
         // strncat(buffer_out, buffer_in, len);
 
@@ -318,12 +318,39 @@ void *_net_server_thread_process(void *ptr)
         // }
 
         _net_common_netpacket packet;
-        memcpy(&packet, &buffer_in, sizeof(buffer_in));
+        memcpy(&packet, &buffer_in, len);
+
+        switch (packet.msg_type)
+        {
+        case ACTION_BETRAY:
+            _net_common_dbg("received ACTION_BETRAY from client %d\n", connection->client_id);
+            (*_net_server_func_betray)(connection->client_id, packet.delay);
+            break;
+        case ACTION_COLLAB:
+            _net_common_dbg("received ACTION_COLLAB from client %d\n", connection->client_id);
+            (*_net_server_func_cooperate)(connection->client_id, packet.delay);
+            break;
+        case ACTION_QUIT:
+            _net_common_dbg("received ACTION_QUIT from client %d\n", connection->client_id);
+            (*_net_server_func_client_disconnect)(connection->client_id);
+            break;
+        case SCREEN_WAITING:
+            _net_common_dbg("ERROR: received SCREEN_WAITING from client %d\n", connection->client_id);
+            break;
+        case SCREEN_CHOICE:
+            _net_common_dbg("ERROR: received SCREEN_CHOICE from client %d\n", connection->client_id);
+            break;
+        case SCREEN_SCORE:
+            _net_common_dbg("ERROR: received SCREEN_SCORE from client %d\n", connection->client_id);
+            break;
+
+        default:
+            _net_common_dbg("Unknown message type, do you have the latest version of the lib ?\n");
+            break;
+        }
 
         //clear input buffer
         memset(buffer_in, '\0', BUFFERSIZE);
-
-        
     }
     printf("Connection to client %i ended \n", connection->index);
     close(connection->sockfd);

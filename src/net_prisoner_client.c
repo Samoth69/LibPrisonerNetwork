@@ -164,7 +164,7 @@ void net_client_betray()
     _net_common_netpacket packet;
     packet.msg_type = ACTION_BETRAY;
     write(net_client_sockfd, &packet, sizeof(packet));
-    _net_common_dbg("%d want to betray", net_client_sockfd);
+    _net_common_dbg("%d want to betray\n", net_client_sockfd);
 }
 
 /**
@@ -175,7 +175,7 @@ void net_client_collab()
     _net_common_netpacket packet;
     packet.msg_type = ACTION_COLLAB;
     write(net_client_sockfd, &packet, sizeof(packet));
-    _net_common_dbg("%d want to collab", net_client_sockfd);    
+    _net_common_dbg("%d want to collab\n", net_client_sockfd);    
 }
 
 /**
@@ -186,6 +186,6 @@ void net_client_disconnect()
     _net_common_netpacket packet;
     packet.msg_type = ACTION_QUIT;
     write(net_client_sockfd, &packet, sizeof(packet));
-    _net_common_dbg("%d want to quit", net_client_sockfd);
+    _net_common_dbg("%d want to quit\n", net_client_sockfd);
 }
 #pragma endregion Client
