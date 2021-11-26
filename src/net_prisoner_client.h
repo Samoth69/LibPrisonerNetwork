@@ -1,7 +1,8 @@
 /**
  * @file net_prisoner_client.h
  * @author Wolodia Zdetovetzky
- * @brief 
+ * @brief all methods declaration required 
+ * by a client for the prisoner dilemna
  * @version 0.1
  * @date 2021-11-26
  * 
@@ -35,11 +36,46 @@
 extern int net_client_sockfd;
 
 /**
- * @brief read and display received messages
- * @param ptr 
- * @return void* 
+ * @brief the function used by the library
+ * refering to the defined one by the client
+ * to display the waiting screen
  */
-void *_net_client_threadProcess(void *ptr);
+void (*_net_client_func_waiting_screen)();
+
+/**
+ * @brief the function used by the library
+ * refering to the defined one by the client
+ * to display the choice screen
+ */
+void (*_net_client_func_choice_screen)();
+
+/**
+ * @brief the function used by the library
+ * refering to the defined one by the client
+ * to display the score screen
+ */
+void (*_net_client_func_score_screen)(bool, int);
+
+/**
+ * @brief define the function using the defined
+ * one by the client to display the wainting screen
+ * @param f the client function 
+ */
+void * net_client_set_func_waiting_screen(void (*f)());
+
+/**
+ * @brief define the function using the defined
+ * one by the client to display the choice screen
+ * @param f the client function 
+ */
+void * net_client_set_func_choice_screen(void (*f)());
+
+/**
+ * @brief define the function using the defined
+ * one by the client to display the score screen
+ * @param f the client function 
+ */
+void * net_client_set_func_score_screen(void (*f)());
 
 /**
  * @brief open the connexion with the server
@@ -67,5 +103,23 @@ void net_client_acces_request();
  * @brief The client want to quit the game
  */
 void net_client_disconnect();
+
+// ----------------------------------------------
+//               Private methods
+// ----------------------------------------------
+
+/**
+ * @brief call the right function 
+ * depends on the packet received from the server
+ * @param packet the packet receive
+ */
+void _net_client_event(_net_common_netpacket packet);
+
+/**
+ * @brief read and display received messages
+ * @param ptr 
+ * @return void* 
+ */
+void *_net_client_threadProcess(void *ptr);
 
 #endif /* NET_PRISONER_CLIENT_H */
