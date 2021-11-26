@@ -6,19 +6,27 @@
 #pragma region Common
 
 /**
+ * @brief Semaphore used for locking the _net_common_dbg function
+ * This should prevent multiple thread from writing to STDOUT at the same time
+ */
+sem_t _lock_log_dbg;
+
+/**
  * @brief show debug message for the net lib
- * in this lib, net_dbg should be used insteadof printf directly.
+ * in this lib, _net_common_dbg should be used insteadof printf directly.
  * this allow the #define NETDEBUG to easily turn on/off all message
  * from this library
  * 
  * @param format work exactly like printf
  * @param ... 
  */
-//TODO: rendre cette fonction thread safe
-void net_dbg(const char *format, ...)
+void _net_common_dbg(const char *format, ...)
 {
     if (NETDEBUG)
     {
+        // grab the semaphore
+        sem_wait(&_lock_log_dbg);
+
         printf("NET: ");
 
         // see: https://sourceware.org/git/?p=glibc.git;a=blob;f=stdio-common/printf.c;h=4c8f3a2a0c38ab27a2eed4d2ff3b804980aa8f9f;hb=3321010338384ecdc6633a8b032bb0ed6aa9b19a
@@ -30,12 +38,21 @@ void net_dbg(const char *format, ...)
         vfprintf(stdout, format, arg);
 
         va_end(arg);
+
+        // release the semaphore
+        sem_post(&_lock_log_dbg);
     }
 }
 
-// ----------------------------------------------
-//                     Client
-// ----------------------------------------------
+/**
+ * @brief initialize common variable for client and server, should be called
+ * in client and server init function.
+ */
+void _net_common_init()
+{
+    // initialize the semaphore before use
+    sem_init(&_lock_log_dbg, PTHREAD_PROCESS_SHARED, 1);
+}
 
 /**
  * @brief 
@@ -53,11 +70,11 @@ void * _threadProcess(void * ptr)
         {
             break;
         }
-        net_dbg("receive %d chars\n", len);
-        net_dbg("%.*s\n", len, buffer_in);
+        _net_common_dbg("receive %d chars\n", len);
+        _net_common_dbg("%.*s\n", len, buffer_in);
     }
     close(net_client_sockfd);
-    net_dbg("client pthread ended, len=%d\n", len);
+    _net_common_dbg("client pthread ended, len=%d\n", len);
 }
 
 /**
@@ -77,7 +94,7 @@ void net_thread_process(char * msg)
     pthread_detach(thread);
     do {
         fgets(msg, MSGLENGHT, stdin);
-        //net_dbg("sending : %s\n", msg);
+        //_net_common_dbg("sending : %s\n", msg);
         status = write(net_client_sockfd, msg, strlen(msg));
 
     } while (status != -1);
@@ -118,7 +135,7 @@ void net_client_connexion(char * addrServer, int port)
 
     //Connect the socket to the server using the address
     if (connect(net_client_sockfd, (struct sockaddr *) &serverAddr, sizeof (serverAddr)) != 0) {
-        net_dbg("Fail to connect to server");
+        _net_common_dbg("Fail to connect to server");
         exit(-1);
     };
 }
@@ -127,7 +144,7 @@ void net_client_connexion(char * addrServer, int port)
  * @brief The client want to betray the other player
  */
 void net_client_betray() {
-    net_dbg("%d want to betray", net_client_sockfd);
+    _net_common_dbg("%d want to betray", net_client_sockfd);
     write(net_client_sockfd, "B", 1);
 }
 
@@ -135,7 +152,7 @@ void net_client_betray() {
  * @brief The client want to collaborate the other player
  */
 void net_client_collab() {  
-    net_dbg("%d want to collab", net_client_sockfd);
+    _net_common_dbg("%d want to collab", net_client_sockfd);
     write(net_client_sockfd, "C", 1);
 }
 
@@ -143,7 +160,7 @@ void net_client_collab() {
  * @brief The client want to play
  */
 void net_client_acces_request() {
-    net_dbg("%d want to play", net_client_sockfd);
+    _net_common_dbg("%d want to play", net_client_sockfd);
     write(net_client_sockfd, "P", 1);
 }
 
@@ -151,7 +168,7 @@ void net_client_acces_request() {
  * @brief The client want to quit the game
  */
 void net_client_disconnect() {
-    net_dbg("%d want to disconnect", net_client_sockfd);
+    _net_common_dbg("%d want to disconnect", net_client_sockfd);
     write(net_client_sockfd, "D", 1);
 }
 #pragma endregion Client
@@ -172,13 +189,19 @@ connection_t *_connections[MAXSIMULTANEOUSCLIENTS];
  */
 pthread_t _net_server_main_thread;
 
+/**
+ * @brief server sockfd id
+ */
 int _net_server_sockfd;
+
+void (*net_server_func_new_client)(int);
 
 /**
  * @brief Setup variables before socket start and start socket (in another thread)
  */
 void net_server_init(char* ip, int port)
 {
+    _net_common_init();
     for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
     {
         _connections[i] = NULL;
@@ -188,6 +211,23 @@ void net_server_init(char* ip, int port)
     pthread_create(&_net_server_main_thread, 0, _net_server_main_pthread, (void *)_net_server_sockfd);
     pthread_detach(&_net_server_main_thread);
 }
+
+void net_server_wait()
+{
+    //todo
+}
+
+void net_server_stop()
+{
+    //todo
+}
+
+void net_server_set_func_new_client(void (*f)(int))
+{
+    net_server_func_new_client = f;
+}
+
+
 
 /**
  * @brief Ajoute une connexion à la liste des connexions ouvertes
@@ -328,6 +368,8 @@ void *_net_server_thread_process(void *ptr)
     printf("New incoming connection \n");
 
     _net_server_connection_add(connection);
+
+    (*net_server_func_new_client)(42);
 
     //Welcome the new client
     printf("Welcome #%i\n", connection->index);

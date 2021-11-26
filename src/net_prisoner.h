@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <semaphore.h>
 
 #ifndef NET_PRISONER_H
 #define NET_PRISONER_H
@@ -46,7 +47,13 @@
  * @param format même fonctionnement que printf
  * @param ... 
  */
-void net_dbg(const char *format, ...);
+void _net_common_dbg(const char *format, ...);
+
+/**
+ * @brief private function
+ * Should init common variable used in client and server
+ */
+void _net_common_init();
 
 // ----------------------------------------------
 //                     Client
@@ -105,6 +112,15 @@ typedef struct {
     int index;
 } connection_t;
 
+typedef struct {
+    //1: betray
+    //2: coop
+    int msg_type;
+    ulong delay;
+    int score;
+    bool has_win;
+} comm;
+
 /**
  * @brief Initialize the server socket and start it in another thread (non-bloking function)
  * 
@@ -120,6 +136,17 @@ typedef struct {
  * @param port network port to listen to
  */
 void net_server_init(char* ip, int port);
+
+/**
+ * @brief Block current thread until net_server_stop() is called
+ */
+void net_server_wait();
+
+/**
+ * @brief Stop the main socket thread and all client thread
+ * This will basically shutdown the whole network lib
+ */
+void net_server_stop();
 
 /**
  * @brief Set the function that the server will trigger when a new client (player)
@@ -170,8 +197,9 @@ void net_server_send_screen_choice(int client);
  * 
  * @param client client id
  * @param has_win true if the client has winned, false otherwise
+ * @param score 
  */
-void net_server_send_screen_round_end(int client, bool has_win);
+void net_server_send_screen_round_end(int client, bool has_win, int score);
 
 //private
 void _net_server_connection_add(connection_t *connection);
