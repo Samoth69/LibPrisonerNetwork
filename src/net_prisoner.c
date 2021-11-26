@@ -165,24 +165,21 @@ void net_client_disconnect()
 
 /**
  * @brief List of clients (connections)
- * 
  */
 connection_t *_connections[MAXSIMULTANEOUSCLIENTS];
 
 /**
  * @brief main thread for the server
  * (this is the thread that will handle all incoming connections)
- * 
  */
 pthread_t _net_server_main_thread;
 
 int _net_server_sockfd;
 
 /**
- * @brief Setup variables before socket start and start socket
- * 
+ * @brief Setup variables before socket start and start socket (in another thread)
  */
-void net_server_init()
+void net_server_init(char* ip, int port)
 {
     for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
     {
@@ -232,11 +229,6 @@ void _net_server_connection_del(connection_t *connection)
     exit(-5);
 }
 
-void net_server_wait();
-void net_server_game_start();
-void net_server_round_end();
-void net_server_match_end();
-
 /**
  * @brief Create a server socket object
  * 
@@ -279,6 +271,11 @@ int _net_server_create_server_socket()
     return sockfd;
 }
 
+/**
+ * @brief Create the main server pthread (this thread will listen to incoming connections)
+ * 
+ * @param sockfd socket id (provided by OS)
+ */
 void *_net_server_main_pthread(int sockfd)
 {
     int index = 1;
