@@ -42,21 +42,38 @@ void client_betray(int client_id, ulong tps)
 	printf("client #%d betray (%ld ms)\n", client_id, tps);
 }
 
+void client_waiting_screen() 
+{
+	printf("client need to display the waiting screen");
+}
+
+void client_choice_screen()
+{
+	printf("client need to display the choice screen");
+}
+
+void client_score_screen(bool as_win, int score) 
+{
+	printf("client need to display the score screen, the client win : %d, score = %d", as_win, score);
+}
+
 int main()
 {
-	net_server_init("0.0.0.0", 7799);
 	net_server_set_func_new_client(new_client);
 	net_server_set_func_client_disconnect(client_disconnecting);
 	net_server_set_func_cooperate(client_cooperate);
 	net_server_set_func_betray(client_betray);
-
-	// création de la connexion
+	net_client_set_func_waiting_screen(client_waiting_screen);
+	net_client_set_func_choice_screen(client_choice_screen);
+	net_client_set_func_score_screen(client_score_screen);
+	
 	char *addrServer = "0.0.0.0";
+	net_server_init(addrServer, 7799);
 	net_client_init(addrServer, 7799);
 
-	while(1){};
-
 	net_server_wait();
+
+	while(1){};
 
 	return (EXIT_SUCCESS);
 }

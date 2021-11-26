@@ -1,7 +1,8 @@
 /**
  * @file net_prisoner_client.c
  * @author Wolodia Zdetovetzky
- * @brief 
+ * @brief all methods implementation required 
+ * by a client for the prisoner dilemna
  * @version 0.1
  * @date 2021-11-26
  * 
@@ -11,8 +12,13 @@
 
 #include "net_prisoner_client.h"
 
+// ----------------------------------------------
+//                     Client
+// ----------------------------------------------
+#pragma region Client
+
 /**
- * @brief Set as global var
+ * @brief client socket file id
  */
 int net_client_sockfd;
 
@@ -74,27 +80,28 @@ void * net_client_set_func_score_screen(void (*f)())
  */
 void _net_client_event(_net_common_netpacket packet) {
 
-        switch (packet.msg_type)
-        {
-        case SCREEN_WAITING:
+    switch (packet.msg_type)
+    {
+    case SCREEN_WAITING:
 
-            _net_common_dbg("ERROR: received SCREEN_WAITING from client %d\n", net_client_sockfd);
-            (*_net_client_func_waiting_screen);
-            break;
+        _net_common_dbg("Client socket %d received SCREEN_WAITING from server\n", net_client_sockfd);
+        (*_net_client_func_waiting_screen);
+        break;
 
-        case SCREEN_CHOICE:
-            _net_common_dbg("ERROR: received SCREEN_CHOICE from client %d\n", net_client_sockfd);
-            (*_net_client_func_choice_screen);
-            break;
+    case SCREEN_CHOICE:
+        _net_common_dbg("Client socket %d received SCREEN_CHOICE from server\n", net_client_sockfd);
+        (*_net_client_func_choice_screen);
+        break;
 
-        case SCREEN_SCORE:
-            _net_common_dbg("ERROR: received SCREEN_SCORE from client %d\n", net_client_sockfd);
-            (*_net_client_func_score_screen)(packet.has_win, packet.score);
-            break;
+    case SCREEN_SCORE:
+        _net_common_dbg("Client socket %d received SCREEN_SCORE from server\n", net_client_sockfd);
+        (*_net_client_func_score_screen)(packet.has_win, packet.score);
+        break;
 
-        default:
-            _net_common_dbg("Unknown message type, do you have the latest version of the lib ?\n");
-            break;
+    default:
+        _net_common_dbg("Unknown message type, do you have the latest version of the lib ?\n");
+        break;
+    }
 }
 
 /**
@@ -121,16 +128,6 @@ void *_net_client_threadProcess(void *ptr)
     close(net_client_sockfd);
     _net_common_dbg("client pthread ended, len=%d\n", len);
 }
-
-#pragma endregion Common
-
-// ----------------------------------------------
-//                     Client
-// ----------------------------------------------
-#pragma region Client
-
-// Globals vars
-int net_client_sockfd;
 
 /**
  * @brief open the connexion with the server
