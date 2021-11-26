@@ -118,7 +118,7 @@ void net_server_send_screen_choice(int client);
  * @param has_win true if the client has winned, false otherwise
  * @param score 
  */
-void net_server_send_screen_round_end(int client, bool has_win, int score);
+void net_server_send_screen_score(int client, bool has_win, int score);
 
 //private
 void _net_server_connection_add(connection_t *connection);
