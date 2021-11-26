@@ -34,11 +34,23 @@
  */
 typedef struct
 {
+    /**
+     * @brief socket id
+     */
     int sockfd;
+    
+    /**
+     * @brief socket address
+     */
     struct sockaddr address;
     int addr_len;
     int index;
-} connection_t;
+
+    /**
+     * @brief Client id. must be unique
+     */
+    int client_id;
+} _net_server_connection_t;
 
 /**
  * @brief Initialize the server socket and start it in another thread (non-bloking function)
@@ -121,10 +133,12 @@ void net_server_send_screen_choice(int client);
 void net_server_send_screen_score(int client, bool has_win, int score);
 
 //private
-void _net_server_connection_add(connection_t *connection);
-void _net_server_connection_del(connection_t *connection);
-int _net_server_create_server_socket();
+void _net_server_connection_add(_net_server_connection_t *connection);
+void _net_server_connection_del(_net_server_connection_t *connection);
+int _net_server_create_server_socket(char *ip_address, int network_port);
 void *_net_server_main_pthread(int sockfd);
 void *_net_server_thread_process(void *ptr);
+
+void _net_server_send_message(_net_common_netpacket *msg, int client_id);
 
 #endif /* NET_PRISONER_SERVER_H */

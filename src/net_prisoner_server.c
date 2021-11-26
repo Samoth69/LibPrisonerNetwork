@@ -19,7 +19,7 @@
 /**
  * @brief List of clients (connections)
  */
-connection_t *_connections[MAXSIMULTANEOUSCLIENTS];
+_net_server_connection_t *_connections[MAXSIMULTANEOUSCLIENTS];
 
 /**
  * @brief main thread for the server
@@ -32,12 +32,25 @@ pthread_t _net_server_main_thread;
  */
 int _net_server_sockfd;
 
-void (*net_server_func_new_client)(int);
+/**
+ * @brief will be switch to true if we need to stop the app
+ */
+bool _net_server_exit = false;
+
+/**
+ * @brief counter to keep track of client id
+ */
+int _net_server_client_id_counter = 0;
+
+void (*_net_server_func_new_client)(int);
+void (*_net_server_func_client_disconnect)(int);
+void (*_net_server_func_cooperate)(int, ulong);
+void (*_net_server_func_betray)(int, ulong);
 
 /**
  * @brief Setup variables before socket start and start socket (in another thread)
  */
-void net_server_init(char* ip, int port)
+void net_server_init(char *ip, int port)
 {
     _net_common_init();
     for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
@@ -45,45 +58,93 @@ void net_server_init(char* ip, int port)
         _connections[i] = NULL;
     }
 
-    _net_server_sockfd = _net_server_create_server_socket();
+    _net_server_sockfd = _net_server_create_server_socket(ip, port);
     pthread_create(&_net_server_main_thread, 0, _net_server_main_pthread, (void *)_net_server_sockfd);
     pthread_detach(&_net_server_main_thread);
 }
 
 void net_server_wait()
 {
-    //todo
+    while (!_net_server_exit)
+    {
+        sleep(1);
+    }
 }
 
 void net_server_stop()
 {
-    //todo
+    _net_server_exit = true;
 }
 
 void net_server_set_func_new_client(void (*f)(int))
 {
-    net_server_func_new_client = f;
+    _net_server_func_new_client = f;
 }
 
+void net_server_set_func_client_disconnect(void (*f)(int))
+{
+    _net_server_func_client_disconnect = f;
+}
 
+void net_server_set_func_cooperate(void (*f)(int, ulong))
+{
+    _net_server_func_cooperate = f;
+}
+
+void net_server_set_func_betray(void (*f)(int, ulong))
+{
+    _net_server_func_betray = f;
+}
+
+void net_server_send_screen_waiting(int client)
+{
+    _net_common_netpacket msg;
+    msg.msg_type = SCREEN_WAITING;
+    _net_server_send_message(&msg, client);
+}
+
+void net_server_send_screen_choice(int client)
+{
+    _net_common_netpacket msg;
+    msg.msg_type = SCREEN_CHOICE;
+    _net_server_send_message(&msg, client);
+}
+
+void net_server_send_screen_score(int client, bool has_win, int score)
+{
+    _net_common_netpacket msg;
+    msg.msg_type = SCREEN_SCORE;
+    msg.has_win = has_win;
+    msg.score = score;
+    _net_server_send_message(&msg, client);
+}
 
 /**
  * @brief Ajoute une connexion à la liste des connexions ouvertes
  * 
  * @param connection 
  */
-void _net_server_connection_add(connection_t *connection)
+void _net_server_connection_add(_net_server_connection_t *connection)
 {
+    bool found = false;
+
     for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
     {
         if (_connections[i] == NULL)
         {
             _connections[i] = connection;
-            return;
+            found = true;
+            break;
         }
     }
-    perror("Too much simultaneous connections");
-    exit(-5);
+    if (!found)
+    {
+        perror("Too much simultaneous connections");
+        exit(-5);
+    }
+
+    (*_net_server_func_new_client)(_net_server_client_id_counter);
+    _net_server_client_id_counter++;
 }
 
 /**
@@ -91,7 +152,7 @@ void _net_server_connection_add(connection_t *connection)
  * 
  * @param connection 
  */
-void _net_server_connection_del(connection_t *connection)
+void _net_server_connection_del(_net_server_connection_t *connection)
 {
     for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
     {
@@ -110,11 +171,10 @@ void _net_server_connection_del(connection_t *connection)
  * 
  * @return int 
  */
-int _net_server_create_server_socket()
+int _net_server_create_server_socket(char *ip_address, int network_port)
 {
     int sockfd = -1;
     struct sockaddr_in address;
-    int port = 7799;
 
     /* create socket */
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -130,8 +190,8 @@ int _net_server_create_server_socket()
     //address.sin_addr.s_addr = INADDR_ANY;
     //ou 0.0.0.0
     //Sinon  127.0.0.1
-    address.sin_addr.s_addr = inet_addr("0.0.0.0");
-    address.sin_port = htons(port);
+    address.sin_addr.s_addr = inet_addr(ip_address);
+    address.sin_port = htons(network_port);
 
     /* prevent the 60 secs timeout */
     int reuse = 1;
@@ -140,7 +200,7 @@ int _net_server_create_server_socket()
     /* bind */
     if (bind(sockfd, (struct sockaddr *)&address, sizeof(struct sockaddr_in)) < 0)
     {
-        fprintf(stderr, "error: cannot bind socket to port %d\n", port);
+        fprintf(stderr, "error: cannot bind socket to port %d\n", network_port);
         return -4;
     }
 
@@ -155,7 +215,7 @@ int _net_server_create_server_socket()
 void *_net_server_main_pthread(int sockfd)
 {
     int index = 1;
-    connection_t *connection;
+    _net_server_connection_t *connection;
     pthread_t thread;
 
     /* listen on port , stack size 50 for incoming connections*/
@@ -165,13 +225,13 @@ void *_net_server_main_pthread(int sockfd)
         return -5;
     }
 
-    printf("ready and listening\n");
+    _net_common_dbg("ready and listening\n");
 
     //Wait for connection
     while (true)
     {
         /* accept incoming connections */
-        connection = (connection_t *)malloc(sizeof(connection_t));
+        connection = (_net_server_connection_t *)malloc(sizeof(_net_server_connection_t));
         connection->sockfd = accept(sockfd, &connection->address, &connection->addr_len);
         connection->index = index++;
         if (connection->sockfd <= 0)
@@ -189,7 +249,7 @@ void *_net_server_main_pthread(int sockfd)
 
 /**
  * Thread allowing server to handle multiple client connections
- * @param ptr connection_t 
+ * @param ptr _net_server_connection_t 
  * @return 
  */
 void *_net_server_thread_process(void *ptr)
@@ -198,74 +258,104 @@ void *_net_server_thread_process(void *ptr)
     char buffer_out[BUFFERSIZE];
 
     int len;
-    connection_t *connection;
+    _net_server_connection_t *connection;
 
     if (!ptr)
         pthread_exit(0);
-    connection = (connection_t *)ptr;
-    printf("New incoming connection \n");
+    connection = (_net_server_connection_t *)ptr;
+    _net_common_dbg("New incoming connection \n");
 
     _net_server_connection_add(connection);
 
-    (*net_server_func_new_client)(42);
-
     //Welcome the new client
-    printf("Welcome #%i\n", connection->index);
-    sprintf(buffer_out, "Welcome #%i\n", connection->index);
-    write(connection->sockfd, buffer_out, strlen(buffer_out));
+    // printf("Welcome #%i\n", connection->index);
+    // sprintf(buffer_out, "Welcome #%i\n", connection->index);
+    // write(connection->sockfd, buffer_out, strlen(buffer_out));
 
     while ((len = read(connection->sockfd, buffer_in, BUFFERSIZE)) > 0)
     {
 
-        if (strncmp(buffer_in, "bye", 3) == 0)
-        {
-            break;
-        }
-#if NETDEBUG
-        printf("DEBUG-----------------------------------------------------------\n");
-        printf("len : %i\n", len);
-        printf("Buffer : %.*s\n", len, buffer_in);
-        printf("----------------------------------------------------------------\n");
-#endif
-        strcpy(buffer_out, "\nServer Echo : ");
-        strncat(buffer_out, buffer_in, len);
+        // if (strncmp(buffer_in, "bye", 3) == 0)
+        // {
+        //     break;
+        // }
+//#if NETDEBUG
+        // printf("DEBUG-----------------------------------------------------------\n");
+        // printf("len : %i\n", len);
+        // printf("Buffer : %.*s\n", len, buffer_in);
+        // printf("----------------------------------------------------------------\n");
+        _net_common_dbg("Received from client %d length %d msg: %s\n", connection->client_id, sizeof(buffer_in), buffer_in);
+//#endif
+        // strcpy(buffer_out, "\nServer Echo : ");
+        // strncat(buffer_out, buffer_in, len);
 
-        if (buffer_in[0] == '@')
-        {
-            for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
-            {
-                if (_connections[i] != NULL)
-                {
-                    write(_connections[i]->sockfd, buffer_out, strlen(buffer_out));
-                }
-            }
-        }
-        else if (buffer_in[0] == '#')
-        {
-            int client = 0;
-            int read = sscanf(buffer_in, "%*[^0123456789]%d ", &client);
-            for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
-            {
-                if (client == _connections[i]->index)
-                {
-                    write(_connections[i]->sockfd, buffer_out, strlen(buffer_out));
-                    break;
-                } //no client found ? : we dont care !!
-            }
-        }
-        else
-        {
-            write(connection->sockfd, buffer_out, strlen(buffer_out));
-        }
+        // if (buffer_in[0] == '@')
+        // {
+        //     for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
+        //     {
+        //         if (_connections[i] != NULL)
+        //         {
+        //             write(_connections[i]->sockfd, buffer_out, strlen(buffer_out));
+        //         }
+        //     }
+        // }
+        // else if (buffer_in[0] == '#')
+        // {
+        //     int client = 0;
+        //     int read = sscanf(buffer_in, "%*[^0123456789]%d ", &client);
+        //     for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
+        //     {
+        //         if (client == _connections[i]->index)
+        //         {
+        //             write(_connections[i]->sockfd, buffer_out, strlen(buffer_out));
+        //             break;
+        //         } //no client found ? : we dont care !!
+        //     }
+        // }
+        // else
+        // {
+        //     write(connection->sockfd, buffer_out, strlen(buffer_out));
+        // }
+
+        _net_common_netpacket packet;
+        memcpy(&packet, &buffer_in, sizeof(buffer_in));
 
         //clear input buffer
         memset(buffer_in, '\0', BUFFERSIZE);
+
+        
     }
     printf("Connection to client %i ended \n", connection->index);
     close(connection->sockfd);
     _net_server_connection_del(connection);
     free(connection);
     pthread_exit(0);
+}
+
+/**
+ * @brief Send the netpacket to appropriate client id, if the client is not found, a warning will
+ * be shown on _net_common_dbg()
+ * 
+ * @param msg netpacket
+ * @param client_id client id, if not valid/found, will send a warning
+ */
+void _net_server_send_message(_net_common_netpacket *msg, int client_id)
+{
+    //used to warn user if the client_id isn't found
+    //will switch to true if a message has been sent
+    //should stay to false otherwise
+    bool found = false;
+    for (int i = 0; i < MAXSIMULTANEOUSCLIENTS; i++)
+    {
+        if (_connections[i] != NULL && _connections[i]->client_id == client_id)
+        {
+            _net_common_dbg("sending %s to client #%d\n", msg->msg_type, client_id);
+            write(_connections[i]->sockfd, msg, sizeof(msg));
+            found = true;
+        }
+    }
+    if (!found)
+        _net_common_dbg("WARNING: client id %d not found, ignoring\n", client_id);
 }
 
 #pragma endregion Server
