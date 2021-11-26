@@ -44,17 +44,17 @@ void client_betray(int client_id, ulong tps)
 
 void client_waiting_screen() 
 {
-	printf("client need to display the waiting screen");
+	printf("client need to display the waiting screen\n");
 }
 
 void client_choice_screen()
 {
-	printf("client need to display the choice screen");
+	printf("client need to display the choice screen\n");
 }
 
 void client_score_screen(bool has_win, int score) 
 {
-	printf("client need to display the score screen, the client win : %d, score = %d", has_win, score);
+	printf("client need to display the score screen, the client win : %d, score = %d\n", has_win, score);
 }
 
 int main()

@@ -36,25 +36,20 @@
 #define NETDEBUG true
 
 /**
+ * @brief if this is true, the lib will make sure only one function provided to
+ * user will be runned at a time
+ */
+#define THREAD_SAFETY true
+
+/**
  * @brief  max size of the buffer 
  */
 #define BUFFERSIZE 2048
 
 /**
- * @brief max size of messages
- */
-#define MSGLENGHT 100
-
-/**
  * @brief Max openned connections for the server
  */
 #define MAXSIMULTANEOUSCLIENTS 100
-
-/**
- * @brief if this is true, the lib will make sure only one function provided to
- * user will be runned at a time
- */
-#define THREAD_SAFETY true
 
 // ----------------------------------------------
 //                     Common
