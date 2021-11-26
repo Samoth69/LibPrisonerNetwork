@@ -104,7 +104,7 @@ void *_net_client_threadProcess(void *ptr)
             break;
         }   
         _net_common_dbg("client %d receive %.*s\n", net_client_sockfd, sizeof(packet),  packet);
-        _net_client_event(packet, len);
+        _net_client_event(packet);
     }
     close(net_client_sockfd);
     _net_common_dbg("client pthread ended, len=%d\n", len);
@@ -147,7 +147,7 @@ void net_client_init(char *addrServer, int port)
 
     //Connect the socket to the server using the address
     if (connect(net_client_sockfd, (struct sockaddr *) &serverAddr, sizeof (serverAddr)) != 0) {
-        _net_common_dbg("Fail to connect to server");
+        _net_common_dbg("\nFail to connect to server\n");
         exit(-1);
     };
 
