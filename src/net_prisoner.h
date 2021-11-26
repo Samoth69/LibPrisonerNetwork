@@ -1,3 +1,12 @@
+/**
+ * @file net_prisoner.h
+ * @brief 
+ * @author Thomas Violent & Wolodia Zdetovetzky
+ * @version 1.0
+ * @date 24/11/2021
+ * @attention do not use methods with a name begginning with "_"
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,11 +38,14 @@
 #define BUFFERSIZE 2048
 
 /**
+ * @brief max size of messages
+ */
+#define MSGLENGHT 100
+
+/**
  * @brief Max openned connections for the server
  */
 #define MAXSIMULTANEOUSCLIENTS 100
-
-#define MSGLENGHT 100
 
 // ----------------------------------------------
 //                     Common
@@ -58,17 +70,24 @@ void net_dbg(const char *format, ...);
 extern int net_client_sockfd;
 
 /**
- * @brief Reading thread creation
- * @param msg message receive
+ * @brief read and display received messages
+ * @param ptr 
+ * @return void* 
  */
-void net_thread_process(char * msg);
+void *_net_client_threadProcess(void *ptr);
+
+/**
+ * @brief Reading thread creation
+ * @return char* message receive
+ */
+char * net_client_listening_server();
 
 /**
  * @brief open the connexion with the server
  * @param addrServer server address IP
  * @param port server port
  */
-void net_client_connexion(char * addrServer, int port);
+void net_client_init(char *addrServer, int port);
 
 /**
  * @brief The client want to betray the other player
@@ -96,9 +115,9 @@ void net_client_disconnect();
 
 /**
  * @brief Structure for keeping track of active connections
- * 
  */
-typedef struct {
+typedef struct
+{
     int sockfd;
     struct sockaddr address;
     int addr_len;
@@ -117,6 +136,5 @@ void _net_server_connection_del(connection_t *connection);
 int _net_server_create_server_socket();
 void *_net_server_main_pthread(int sockfd);
 void *_net_server_thread_process(void *ptr);
-
 
 #endif /* NET_PRISONER_H */

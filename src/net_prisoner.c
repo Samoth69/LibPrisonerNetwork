@@ -1,4 +1,11 @@
 #include "net_prisoner.h"
+/**
+ * @file net_prisoner.c
+ * @brief 
+ * @author Thomas Violent & Wolodia Zdetovetzky
+ * @version 1.0
+ * @date 24/11/2021
+ */
 
 // ----------------------------------------------
 //                     Common
@@ -32,20 +39,27 @@ void net_dbg(const char *format, ...)
         va_end(arg);
     }
 }
+#pragma endregion Common
 
 // ----------------------------------------------
 //                     Client
 // ----------------------------------------------
+#pragma region Client
 
 /**
- * @brief 
- * @param ptr 
+ * @brief Set as global var
+ */
+int net_client_sockfd;
+
+/**
+ * @brief read and display received messages
+ * @param ptr the net_client_sockfd
  * @return void* 
  */
-void * _threadProcess(void * ptr) 
+void *_net_client_threadProcess(void *ptr)
 {
     char buffer_in[BUFFERSIZE];
-    net_client_sockfd = *((int *) ptr);
+    net_client_sockfd = *((int *)ptr);
     int len;
     while ((len = read(net_client_sockfd, buffer_in, BUFFERSIZE)) != 0)
     {
@@ -62,42 +76,34 @@ void * _threadProcess(void * ptr)
 
 /**
  * @brief Reading thread creation
- * @param msg message receive
+ * @return char* message receive
  */
-void net_thread_process(char * msg) 
+char * net_client_listening_server()
 {
-
+    char * response;
     pthread_t thread;
     int status = 0;
 
     // reading pthread creation
-    pthread_create(&thread, 0, _threadProcess, &net_client_sockfd);
-    //write(connection->sock,"Main APP Still running",15);
-    
+    pthread_create(&thread, 0, _net_client_threadProcess, &net_client_sockfd);
+
     pthread_detach(thread);
-    do {
-        fgets(msg, MSGLENGHT, stdin);
-        //net_dbg("sending : %s\n", msg);
-        status = write(net_client_sockfd, msg, strlen(msg));
+    do
+    {
+        fgets(response, MSGLENGHT, stdin);
+        status = write(net_client_sockfd, response, strlen(response));
 
     } while (status != -1);
+
+    return response;
 }
-#pragma endregion Common
-
-// ----------------------------------------------
-//                     Client
-// ----------------------------------------------
-#pragma region Client
-
-// Globals vars
-int net_client_sockfd;
 
 /**
  * @brief open the connexion with the server
  * @param addrServer server address IP
  * @param port server port
  */
-void net_client_connexion(char * addrServer, int port) 
+void net_client_init(char *addrServer, int port)
 {
     struct sockaddr_in serverAddr;
 
@@ -108,7 +114,7 @@ void net_client_connexion(char * addrServer, int port)
     // Address family is Internet
     serverAddr.sin_family = AF_INET;
 
-    //Set port number, using htons function 
+    //Set port number, using htons function
     serverAddr.sin_port = htons(port);
 
     //Set IP address to localhost
@@ -117,7 +123,8 @@ void net_client_connexion(char * addrServer, int port)
     memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
 
     //Connect the socket to the server using the address
-    if (connect(net_client_sockfd, (struct sockaddr *) &serverAddr, sizeof (serverAddr)) != 0) {
+    if (connect(net_client_sockfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) != 0)
+    {
         net_dbg("Fail to connect to server");
         exit(-1);
     };
@@ -126,31 +133,26 @@ void net_client_connexion(char * addrServer, int port)
 /**
  * @brief The client want to betray the other player
  */
-void net_client_betray() {
-    net_dbg("%d want to betray", net_client_sockfd);
+void net_client_betray()
+{
+    net_dbg("%d want to betray\n", net_client_sockfd);
     write(net_client_sockfd, "B", 1);
 }
 
 /**
  * @brief The client want to collaborate the other player
  */
-void net_client_collab() {  
-    net_dbg("%d want to collab", net_client_sockfd);
+void net_client_collab()
+{
+    net_dbg("%d want to collab\n", net_client_sockfd);
     write(net_client_sockfd, "C", 1);
-}
-
-/**
- * @brief The client want to play
- */
-void net_client_acces_request() {
-    net_dbg("%d want to play", net_client_sockfd);
-    write(net_client_sockfd, "P", 1);
 }
 
 /**
  * @brief The client want to quit the game
  */
-void net_client_disconnect() {
+void net_client_disconnect()
+{
     net_dbg("%d want to disconnect", net_client_sockfd);
     write(net_client_sockfd, "D", 1);
 }
@@ -351,6 +353,15 @@ void *_net_server_thread_process(void *ptr)
         printf("----------------------------------------------------------------\n");
 #endif
         strcpy(buffer_out, "\nServer Echo : ");
+
+
+        /**
+         * @warning tmp
+         */
+        write(connection->sockfd, "B", 1);
+
+
+
         strncat(buffer_out, buffer_in, len);
 
         if (buffer_in[0] == '@')
