@@ -50,6 +50,12 @@
  */
 #define MAXSIMULTANEOUSCLIENTS 100
 
+/**
+ * @brief if this is true, the lib will make sure only one function provided to
+ * user will be runned at a time
+ */
+#define THREAD_SAFETY true
+
 // ----------------------------------------------
 //                     Common
 // ----------------------------------------------

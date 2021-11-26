@@ -48,7 +48,7 @@ void (*_net_client_func_score_screen)(bool, int);
  * one by the client to display the wainting screen
  * @param f the client function 
  */
-void * net_client_set_func_waiting_screen(void (*f)()) 
+void *net_client_set_func_waiting_screen(void (*f)())
 {
     _net_client_func_waiting_screen = f;
 }
@@ -58,7 +58,7 @@ void * net_client_set_func_waiting_screen(void (*f)())
  * one by the client to display the choice screen
  * @param f the client function 
  */
-void * net_client_set_func_choice_screen(void (*f)()) 
+void *net_client_set_func_choice_screen(void (*f)())
 {
     _net_client_func_choice_screen = f;
 }
@@ -68,7 +68,7 @@ void * net_client_set_func_choice_screen(void (*f)())
  * one by the client to display the score screen
  * @param f the client function 
  */
-void * net_client_set_func_score_screen(void (*f)()) 
+void *net_client_set_func_score_screen(void (*f)())
 {
     _net_client_func_score_screen = f;
 }
@@ -78,7 +78,8 @@ void * net_client_set_func_score_screen(void (*f)())
  * depends on the packet received from the server
  * @param packet the packet receive
  */
-void _net_client_event(_net_common_netpacket packet) {
+void _net_client_event(_net_common_netpacket packet)
+{
 
     switch (packet.msg_type)
     {
@@ -113,7 +114,7 @@ void *_net_client_threadProcess(void *ptr)
 {
     char buffer_in[BUFFERSIZE];
     _net_common_netpacket packet;
-    
+
     net_client_sockfd = *((int *)ptr);
     int len;
     while ((len = read(net_client_sockfd, &packet, sizeof(packet))) != 0)
@@ -121,7 +122,7 @@ void *_net_client_threadProcess(void *ptr)
         if (strncmp(buffer_in, "exit", 4) == 0)
         {
             break;
-        }   
+        }
         _net_common_dbg("client %d receive %d\n", net_client_sockfd, sizeof(packet));
         _net_client_event(packet);
     }
@@ -155,7 +156,8 @@ void net_client_init(char *addrServer, int port)
     memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
 
     //Connect the socket to the server using the address
-    if (connect(net_client_sockfd, (struct sockaddr *) &serverAddr, sizeof (serverAddr)) != 0) {
+    if (connect(net_client_sockfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) != 0)
+    {
         _net_common_dbg("\nFail to connect to server\n");
         exit(-1);
     };
@@ -168,7 +170,7 @@ void net_client_init(char *addrServer, int port)
 /**
  * @brief The client want to betray the other player
  */
-void net_client_betray() 
+void net_client_betray()
 {
     _net_common_netpacket packet;
     packet.msg_type = ACTION_BETRAY;
@@ -179,18 +181,18 @@ void net_client_betray()
 /**
  * @brief The client want to collaborate the other player
  */
-void net_client_collab() 
-{  
+void net_client_collab()
+{
     _net_common_netpacket packet;
     packet.msg_type = ACTION_COLLAB;
     write(net_client_sockfd, &packet, sizeof(packet));
-    _net_common_dbg("%d want to collab\n", net_client_sockfd);    
+    _net_common_dbg("%d want to collab\n", net_client_sockfd);
 }
 
 /**
  * @brief The client want to quit the game
  */
-void net_client_disconnect() 
+void net_client_disconnect()
 {
     _net_common_netpacket packet;
     packet.msg_type = ACTION_QUIT;
