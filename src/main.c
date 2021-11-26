@@ -10,22 +10,16 @@
 #include <stdlib.h>
 #include "net_prisoner.h"
 
-void trahir(int client, ulong tps)
+void new_client(int client_id)
 {
-
-}
-
-void *cooperer(int client)
-{
-
+	counter++;
+	printf("new_client: %d (id: %d)", counter, client_id);
 }
 
 int main()
 {
-	net_dbg("yolo");
 	net_server_init("0.0.0.0", 7799);
-	//net_server_set_func_betray(&trahir);
-
+	net_server_set_func_new_client(new_client);
 
 	// création de la connexion
 	char *addrServer = "0.0.0.0";
@@ -36,5 +30,11 @@ int main()
 
 	while(1){};
 
+	net_server_wait();
+
+	while (1)
+	{
+		sleep(1);
+	}
 	return (EXIT_SUCCESS);
 }
