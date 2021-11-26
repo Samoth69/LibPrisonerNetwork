@@ -69,12 +69,60 @@ void _net_common_dbg(const char *format, ...);
  */
 void _net_common_init();
 
+
+/**
+ * @brief define all the messages type exchanged between the client and the server
+ */
+enum msg_type {
+    /**
+     * @brief the client betray the other
+     */
+    ACTION_BETRAY = 0,
+    /**
+     * @brief the client collab with the other
+     */
+    ACTION_COLLAB = 1,
+    /**
+     * @brief the client quit the game
+     */
+    ACTION_QUIT = 2,
+    /**
+     * @brief the client need to display the waiting screen before the game start
+     */
+    SCREEN_WAITING = 4,
+    /**
+     * @brief the client need to make a choice
+     */
+    SCREEN_CHOICE = 5,
+    /**
+     * @brief the client need to display the score,
+     * int score contain the score 
+     */
+    SCREEN_SCORE = 6
+};
+
+/**
+ * @brief  define the structure used to exchanged between the client and the server
+ */
 typedef struct {
-    //1: betray
-    //2: coop
-    int msg_type;
+    /**
+     * @brief type of the message
+     */
+    enum msg_type;
+
+    /**
+     * @brief network time exec
+     */
     ulong delay;
+
+    /**
+     * @brief player score
+     */
     int score;
+
+    /**
+     * @brief true if the player win
+     */
     bool has_win;
 } comm;
 
