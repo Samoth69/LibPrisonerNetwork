@@ -35,9 +35,5 @@ int main()
 
 	net_server_wait();
 
-	while (1)
-	{
-		sleep(1);
-	}
 	return (EXIT_SUCCESS);
 }
