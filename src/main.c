@@ -1,8 +1,14 @@
-#include <stdio.h>
+/**
+ * @file main.c
+ * @brief 
+ * @author Thomas Violent & Wolodia Zdetovetzky
+ * @version 1.0
+ * @date 24/11/2021
+ */
+
+#include <stdio.h>		
 #include <stdlib.h>
 #include "net_prisoner.h"
-
-int counter = 0;
 
 void new_client(int client_id)
 {
@@ -16,19 +22,13 @@ int main()
 	net_server_set_func_new_client(new_client);
 
 	// création de la connexion
-	char *addrServer = "127.0.0.1\0";
-	net_client_connexion(addrServer, 7799);
+	char *addrServer = "0.0.0.0";
+	net_client_init(addrServer, 7799);
 
 	// envoie d'un message
-	char msg[MSGLENGHT];
-	strcpy(msg, "socket test\n");
-	printf("sending : %s\n", msg);
-	write(net_client_sockfd, msg, strlen(msg));
+	net_client_betray();
 
-	// écoute d'une réponse
-	memset(msg, '\0', MSGLENGHT);
-	net_thread_process(&msg);
-	printf("received : %s\n", msg);
+	while(1){};
 
 	net_server_wait();
 

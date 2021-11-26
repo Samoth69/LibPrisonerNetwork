@@ -1,4 +1,11 @@
 #include "net_prisoner.h"
+/**
+ * @file net_prisoner.c
+ * @brief 
+ * @author Thomas Violent & Wolodia Zdetovetzky
+ * @version 1.0
+ * @date 24/11/2021
+ */
 
 // ----------------------------------------------
 //                     Common
@@ -55,14 +62,36 @@ void _net_common_init()
 }
 
 /**
- * @brief 
- * @param ptr 
+ * @brief Set as global var
+ */
+int net_client_sockfd;
+
+
+void *_net_client_func_waiting_screen;
+void (*_net_client_func_round_end)(bool, int);
+
+
+void *net_client_set_func_waiting_screen(void (*f)) 
+{
+    _net_client_func_waiting_screen = f;
+}
+
+
+void _net_client_event(char * buffer_in, int length) {
+    if (strcmp(buffer_in, "W")) {
+        *_net_client_func_waiting_screen;
+    }
+}
+
+/**
+ * @brief read and display received messages
+ * @param ptr the net_client_sockfd
  * @return void* 
  */
-void * _threadProcess(void * ptr) 
+void *_net_client_threadProcess(void *ptr)
 {
     char buffer_in[BUFFERSIZE];
-    net_client_sockfd = *((int *) ptr);
+    net_client_sockfd = *((int *)ptr);
     int len;
     while ((len = read(net_client_sockfd, buffer_in, BUFFERSIZE)) != 0)
     {
@@ -70,35 +99,14 @@ void * _threadProcess(void * ptr)
         {
             break;
         }
-        _net_common_dbg("receive %d chars\n", len);
+        _net_common_dbg("client %d receive %d chars\n", net_client_sockfd, len);
         _net_common_dbg("%.*s\n", len, buffer_in);
+        event(buffer_in, len);
     }
     close(net_client_sockfd);
     _net_common_dbg("client pthread ended, len=%d\n", len);
 }
 
-/**
- * @brief Reading thread creation
- * @param msg message receive
- */
-void net_thread_process(char * msg) 
-{
-
-    pthread_t thread;
-    int status = 0;
-
-    // reading pthread creation
-    pthread_create(&thread, 0, _threadProcess, &net_client_sockfd);
-    //write(connection->sock,"Main APP Still running",15);
-    
-    pthread_detach(thread);
-    do {
-        fgets(msg, MSGLENGHT, stdin);
-        //_net_common_dbg("sending : %s\n", msg);
-        status = write(net_client_sockfd, msg, strlen(msg));
-
-    } while (status != -1);
-}
 #pragma endregion Common
 
 // ----------------------------------------------
@@ -114,9 +122,10 @@ int net_client_sockfd;
  * @param addrServer server address IP
  * @param port server port
  */
-void net_client_connexion(char * addrServer, int port) 
+void net_client_init(char *addrServer, int port)
 {
     struct sockaddr_in serverAddr;
+    pthread_t thread;
 
     // Create the socket.
     net_client_sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -125,7 +134,7 @@ void net_client_connexion(char * addrServer, int port)
     // Address family is Internet
     serverAddr.sin_family = AF_INET;
 
-    //Set port number, using htons function 
+    //Set port number, using htons function
     serverAddr.sin_port = htons(port);
 
     //Set IP address to localhost
@@ -138,22 +147,28 @@ void net_client_connexion(char * addrServer, int port)
         _net_common_dbg("Fail to connect to server");
         exit(-1);
     };
+
+    // reading pthread creation
+    pthread_create(&thread, 0, _net_client_threadProcess, &net_client_sockfd);
+    pthread_detach(thread);
 }
 
 /**
  * @brief The client want to betray the other player
  */
-void net_client_betray() {
+void net_client_betray() 
+{
     _net_common_dbg("%d want to betray", net_client_sockfd);
-    write(net_client_sockfd, "B", 1);
+    write(net_client_sockfd, "B", 2);
 }
 
 /**
  * @brief The client want to collaborate the other player
  */
-void net_client_collab() {  
+void net_client_collab() 
+{  
     _net_common_dbg("%d want to collab", net_client_sockfd);
-    write(net_client_sockfd, "C", 1);
+    write(net_client_sockfd, "C", 2);
 }
 
 /**
@@ -161,15 +176,16 @@ void net_client_collab() {
  */
 void net_client_acces_request() {
     _net_common_dbg("%d want to play", net_client_sockfd);
-    write(net_client_sockfd, "P", 1);
+    write(net_client_sockfd, "P", 2);
 }
 
 /**
  * @brief The client want to quit the game
  */
-void net_client_disconnect() {
+void net_client_disconnect() 
+{
     _net_common_dbg("%d want to disconnect", net_client_sockfd);
-    write(net_client_sockfd, "D", 1);
+    write(net_client_sockfd, "D", 2);
 }
 #pragma endregion Client
 
