@@ -36,27 +36,6 @@
 extern int net_client_sockfd;
 
 /**
- * @brief the function used by the library
- * refering to the defined one by the client
- * to display the waiting screen
- */
-void (*_net_client_func_waiting_screen)();
-
-/**
- * @brief the function used by the library
- * refering to the defined one by the client
- * to display the choice screen
- */
-void (*_net_client_func_choice_screen)();
-
-/**
- * @brief the function used by the library
- * refering to the defined one by the client
- * to display the score screen
- */
-void (*_net_client_func_score_screen)(bool, int);
-
-/**
  * @brief define the function using the defined
  * one by the client to display the wainting screen
  * @param f the client function 
@@ -93,11 +72,6 @@ void net_client_betray();
  * @brief The client want to collaborate the other player
  */
 void net_client_collab();
-
-/**
- * @brief The client want to play
- */
-void net_client_acces_request();
 
 /**
  * @brief The client want to quit the game
