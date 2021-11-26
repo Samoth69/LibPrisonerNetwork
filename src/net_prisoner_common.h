@@ -43,16 +43,6 @@
 #define THREAD_SAFETY true
 
 /**
- * @brief  max size of the buffer 
- */
-#define BUFFERSIZE 2048
-
-/**
- * @brief max size of messages
- */
-#define MSGLENGHT 100
-
-/**
  * @brief Max openned connections for the server
  */
 #define MAXSIMULTANEOUSCLIENTS 100

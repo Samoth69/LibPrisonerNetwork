@@ -84,7 +84,6 @@ void _net_client_event(_net_common_netpacket packet)
     switch (packet.msg_type)
     {
     case SCREEN_WAITING:
-
         _net_common_dbg("Client socket %d received SCREEN_WAITING from server\n", net_client_sockfd);
         (*_net_client_func_waiting_screen)();
         break;
@@ -112,14 +111,13 @@ void _net_client_event(_net_common_netpacket packet)
  */
 void *_net_client_threadProcess(void *ptr)
 {
-    char buffer_in[BUFFERSIZE];
     _net_common_netpacket packet;
 
     net_client_sockfd = *((int *)ptr);
     int len;
     while ((len = read(net_client_sockfd, &packet, sizeof(packet))) > 0)
     {
-        _net_common_dbg("client %d receive %d\n", net_client_sockfd, sizeof(packet));
+        _net_common_dbg("client socket %d receive %d bits\n", net_client_sockfd, sizeof(packet));
         _net_client_event(packet);
         //memset(&packet, '\0', len);
     }
