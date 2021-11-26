@@ -8,7 +8,8 @@
 
 #include <stdio.h>		
 #include <stdlib.h>
-#include "net_prisoner.h"
+#include "net_prisoner_client.h"
+#include "net_prisoner_server.h"
 
 int counter;
 
