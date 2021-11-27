@@ -126,6 +126,7 @@ void *_net_client_threadProcess(void *ptr)
     {   
         _net_common_dbg("client socket %d receive %d bits\n", net_client_sockfd, sizeof(packet));
         _net_client_event(packet);
+        //memset(&packet, '\0', len);
     }
     close(net_client_sockfd);
     _net_common_dbg("client pthread ended, len=%d\n", len);
