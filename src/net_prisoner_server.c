@@ -72,6 +72,9 @@ void net_server_init(char *ip, int port)
     pthread_detach(&_net_server_main_thread);
 }
 
+/**
+ * @brief Wait for _net_server_exit to be true
+ */
 void net_server_wait()
 {
     while (!_net_server_exit)
@@ -80,31 +83,65 @@ void net_server_wait()
     }
 }
 
+/**
+ * @brief Tell the server that it should stop (net_server_wait will stop)
+ */
 void net_server_stop()
 {
     _net_server_exit = true;
 }
 
+/**
+ * @brief Define the function to be called when a new client is connecting to the server
+ * 
+ * @param f Function to be called
+ * int is the client id
+ */
 void net_server_set_func_new_client(void (*f)(int))
 {
     _net_server_func_new_client = f;
 }
 
+/**
+ * @brief Define the function to be called when a client is disconnecting from the server
+ * 
+ * @param f Function to be called
+ * int is the client id
+ */
 void net_server_set_func_client_disconnect(void (*f)(int))
 {
     _net_server_func_client_disconnect = f;
 }
 
+/**
+ * @brief Define the function to be called when a client click the cooperate button
+ * 
+ * @param f Function to be called
+ * int is client id
+ * ulong is the delay for the client to answer
+ */
 void net_server_set_func_cooperate(void (*f)(int, ulong))
 {
     _net_server_func_cooperate = f;
 }
 
+/**
+ * @brief Define the function to be called when a client click the betray button
+ * 
+ * @param f Function to be called
+ * int is client id
+ * ulong is the delay for the client 
+ */
 void net_server_set_func_betray(void (*f)(int, ulong))
 {
     _net_server_func_betray = f;
 }
 
+/**
+ * @brief Send to specified client to switch to waiting screen
+ * 
+ * @param client client id
+ */
 void net_server_send_screen_waiting(int client)
 {
     _net_common_netpacket msg;
@@ -112,6 +149,11 @@ void net_server_send_screen_waiting(int client)
     _net_server_send_message(&msg, client);
 }
 
+/**
+ * @brief Send to specified client to switch to choice screen
+ * 
+ * @param client client id
+ */
 void net_server_send_screen_choice(int client)
 {
     _net_common_netpacket msg;
@@ -119,6 +161,15 @@ void net_server_send_screen_choice(int client)
     _net_server_send_message(&msg, client);
 }
 
+/**
+ * @brief Send to specified client to switch to score screen
+ * The client may show the given results
+ * 
+ * @param client client id
+ * @param has_win should be true if this client has win
+ * @param score Score for the client (this value isn't enforce, there may be
+ * any value a int can handle)
+ */
 void net_server_send_screen_score(int client, bool has_win, int score)
 {
     _net_common_netpacket msg;
