@@ -63,6 +63,7 @@ OBJECTS		:= $(SOURCES:.c=.o)
 #
 
 OUTPUTMAIN	:= $(call FIXPATH,$(OUTPUT)/$(MAIN))
+OUTPUTLIB := $(call FIXPATH,$(OUTPUT))
 
 all: $(OUTPUT) $(MAIN)
 	@echo Executing 'all' complete!
@@ -92,3 +93,7 @@ run: all
 	
 documentation:
 	@doxygen configDoxygen
+
+libs:
+	ar -cvq $(OUTPUTLIB)/net_client.a $(SOURCEDIRS)/net_prisoner_client.o $(SOURCEDIRS)/net_prisoner_common.o
+	ar -cvq $(OUTPUTLIB)/net_server.a $(SOURCEDIRS)/net_prisoner_server.o $(SOURCEDIRS)/net_prisoner_common.o
