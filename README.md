@@ -51,7 +51,7 @@ void new_client(int client_id)
 {
 	printf("new_client id %d\n", client_id);
 	net_server_send_screen_waiting(432);
-
+    
     //additionnal server logic here when a new client arrived
 }
 
