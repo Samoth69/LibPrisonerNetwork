@@ -11,7 +11,6 @@
  */
 
 #include "net_prisoner_client.h"
-#include "net_prisoner_common.h"
 
 // ----------------------------------------------
 //                     Client
@@ -22,12 +21,6 @@
  * @brief client socket file id
  */
 int net_client_sockfd;
-
-/**
- * @brief Semaphore used for locking the _net_common_dbg function
- * This should prevent multiple thread from writing to STDOUT at the same time
- */
-sem_t _lock_log_dbg;
 
 /**
  * @brief the function used by the library
@@ -139,10 +132,6 @@ void *_net_client_threadProcess(void *ptr)
  */
 void net_client_init(char *addrServer, int port)
 {
-
-    // grab the semaphore
-    sem_wait(&_lock_log_dbg);
-
     struct sockaddr_in serverAddr;
     pthread_t thread;
 
@@ -167,9 +156,6 @@ void net_client_init(char *addrServer, int port)
         _net_common_dbg("\nFail to connect to server\n");
         exit(-1);
     };
-
-    // release the semaphore
-    sem_post(&_lock_log_dbg);
 
     // reading pthread creation
     pthread_create(&thread, 0, _net_client_threadProcess, &net_client_sockfd);
