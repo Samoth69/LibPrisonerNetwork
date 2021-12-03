@@ -2,7 +2,7 @@
 
 This lib is part of a school project.
 
-This lib allow network communication between client and server. it has been designed for the [Prisoner's dilemma](https://en.wikipedia.org/wiki/Prisoner%27s_dilemma). it allows clients and server to send event when an action happened, for example when a client click the betray button, the server is notified that client has click the button.
+It allows network communication between client and server. it has been designed for the [Prisoner's dilemma](https://en.wikipedia.org/wiki/Prisoner%27s_dilemma). it allows clients and server to send event when an action happened, for example when a client click the betray button, the server is notified that client has click the button.
 
 This lib has 3 files (.c/.h):
 - net_prisoner_client: client part of the lib. client should import .h file only
