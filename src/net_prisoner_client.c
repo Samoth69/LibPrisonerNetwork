@@ -137,6 +137,8 @@ void *_net_client_threadProcess(void *ptr)
  */
 void net_client_init(char *addrServer, int port, int client_id)
 {
+    net_client_id = client_id;
+
     struct sockaddr_in serverAddr;
     pthread_t thread;
 
@@ -165,9 +167,10 @@ void net_client_init(char *addrServer, int port, int client_id)
     // init the client id
     _net_common_netpacket packet;
     packet.msg_type = INIT_CLIENT_ID;
-    packet.client_id = client_id;
+    packet.client_id = net_client_id;
     write(net_client_sockfd, &packet, sizeof(packet));
     _net_common_dbg("the client sent his id : %d\n", net_client_id);
+    
 
     // reading pthread creation
     pthread_create(&thread, 0, _net_client_threadProcess, &net_client_sockfd);

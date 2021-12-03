@@ -40,7 +40,7 @@ bool _net_server_exit = false;
 /**
  * @brief counter to keep track of client id
  */
-int _net_server_client_id_counter = 0;
+//int _net_server_client_id_counter = 0;
 
 /**
  * @brief Use to protect lib user function from multiple executions
@@ -202,8 +202,6 @@ void _net_server_connection_add(_net_server_connection_t *connection)
         perror("Too much simultaneous connections");
         exit(-5);
     }
-    _net_server_call_new_client(_net_server_client_id_counter);
-    _net_server_client_id_counter++;
 }
 
 /**
@@ -347,11 +345,11 @@ void *_net_server_thread_process(void *ptr)
 
         if (len != sizeof(packet))
         {
-            _net_common_dbg("WARN: Invalid packet received, ignoring\n");
+            _net_common_dbg("WARN: Invalid packet received from client %d, ignoring\n", connection->client_id);
             continue;
         }
 
-        _net_common_dbg("Received from client #%d length %d\n", connection->client_id, len);
+        //_net_common_dbg("Received from client #%d length %d\n", connection->client_id, len);
         memcpy(&packet, &buffer_in, len);
 
         switch (packet.msg_type)
@@ -377,6 +375,11 @@ void *_net_server_thread_process(void *ptr)
             break;
         case SCREEN_SCORE:
             _net_common_dbg("ERROR: received SCREEN_SCORE from client %d\n", connection->client_id);
+            break;
+        case INIT_CLIENT_ID:
+            connection->client_id = packet.client_id;
+            _net_common_dbg("Received INIT_CLIENT_ID from client %d\n", connection->client_id);
+            _net_server_call_new_client(connection->client_id);
             break;
 
         default:

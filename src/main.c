@@ -19,11 +19,11 @@ void new_client(int client_id)
 	printf("new_client: %d (id: %d)\n", counter, client_id);
 
 	// envoie d'un message
-	net_client_betray();
+	net_client_betray(124241322);
 
-	net_server_send_screen_choice(0);
-	net_server_send_screen_waiting(0);
-	net_server_send_screen_score(0, true, 42);
+	net_server_send_screen_choice(432);
+	net_server_send_screen_waiting(432);
+	net_server_send_screen_score(432, true, 42);
 }
 
 void client_disconnecting(int client_id)
@@ -69,7 +69,7 @@ int main()
 	
 	char *addrServer = "0.0.0.0";
 	net_server_init(addrServer, 7799);
-	net_client_init(addrServer, 7799);
+	net_client_init(addrServer, 7799, 432);
 
 	net_server_wait();
 
