@@ -365,7 +365,7 @@ void *_net_server_thread_process(void *ptr)
         case ACTION_QUIT:
             _net_common_dbg("received ACTION_QUIT from client %d\n", connection->client_id);
             _net_server_func_client_disconnect(connection->client_id);
-            quit = true;
+            net_server_stop();
             break;
         case SCREEN_WAITING:
             _net_common_dbg("ERROR: received SCREEN_WAITING from client %d\n", connection->client_id);
