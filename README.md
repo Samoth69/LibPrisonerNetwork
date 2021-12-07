@@ -18,6 +18,7 @@ the [net_prisoner_common.h](src/net_prisoner_common.h) file contains settings fo
 - The lib only use TCP as protocol
 - The lib use pthread internally to make function less blocking
 - By default, server function are protected against concurrency with a semaphore, basically, none of the user provided function will be executed in parallel.
+- **Make sure to add `-pthread` to gcc CFLAGS**
 
 ## Building
 
