@@ -65,6 +65,6 @@ void _net_common_init()
     sem_init(&_lock_log_dbg, PTHREAD_PROCESS_SHARED, 1);
     if (THREAD_SAFETY)
     {
-        _net_common_dbg("Thread safety enabled");
+        _net_common_dbg("Thread safety enabled\n");
     }
 }

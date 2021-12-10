@@ -6,6 +6,9 @@
 # exclus les fichiers *.o (fichier de compilation)
 *.o
 
+# exclus les fichiers d'archive (seront upload en manu sur github)
+*.a
+
 # force l'intégration du makefile dans git
 !Makefile
 
@@ -32,3 +35,6 @@ doxygen
 # test des fonctionnalités de la lib.
 # il ne servira pas en prod
 main.c
+
+# personnal file note
+notes.md
