@@ -70,7 +70,7 @@ void *net_client_set_func_waiting_screen(void (*f)())
  * one by the client to display the choice screen
  * @param f the client function 
  */
-void *net_client_set_func_choice_screen(void (*f)(net_common_round_score))
+void *net_client_set_func_choice_screen(void (*f)())
 {
     _net_client_func_choice_screen = f;
 }
@@ -90,7 +90,7 @@ void *net_client_set_func_score_final(void (*f)(net_common_final_score))
  * one by the client to display the score screen
  * @param f the client function 
  */
-void *net_client_set_func_score_screen(void (*f)())
+void *net_client_set_func_score_screen(void (*f)(net_common_round_score))
 {
     _net_client_func_score_screen = f;
 }
