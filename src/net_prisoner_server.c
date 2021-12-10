@@ -161,10 +161,11 @@ void net_server_send_screen_choice(int client)
     _net_server_send_message(&msg, client);
 }
 
+// TODO
 /**
  * @brief Send to specified client to switch to score screen
  * The client may show the given results
- * 
+ * @warning TODO
  * @param client client id
  * @param has_win should be true if this client has win
  * @param score Score for the client (this value isn't enforce, there may be
@@ -373,9 +374,11 @@ void *_net_server_thread_process(void *ptr)
         case SCREEN_CHOICE:
             _net_common_dbg("ERROR: received SCREEN_CHOICE from client %d\n", connection->client_id);
             break;
-        case SCREEN_SCORE:
+        // TODO
+        case SCREEN:
             _net_common_dbg("ERROR: received SCREEN_SCORE from client %d\n", connection->client_id);
             break;
+        
         case INIT_CLIENT_ID:
             connection->client_id = packet.client_id;
             _net_common_dbg("Received INIT_CLIENT_ID from client %d\n", connection->client_id);
