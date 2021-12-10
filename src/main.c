@@ -6,7 +6,7 @@
  * @date 24/11/2021
  */
 
-#include <stdio.h>		
+#include <stdio.h>
 #include <stdlib.h>
 #include "net_prisoner_client.h"
 #include "net_prisoner_server.h"
@@ -22,7 +22,7 @@ void new_client(int client_id)
 	net_client_betray(10);
 	net_server_send_screen_choice(432);
 	net_server_send_screen_waiting(432);
-	net_server_send_screen_score(432, true, 42);
+	net_server_send_screen_score(432, true, 42, 3, 5);
 }
 
 void client_disconnecting(int client_id)
@@ -41,7 +41,7 @@ void client_betray(int client_id, ulong tps)
 	printf("client #%d betray (%ld ms)\n", client_id, tps);
 }
 
-void client_waiting_screen() 
+void client_waiting_screen()
 {
 	printf("client need to display the waiting screen\n");
 }
@@ -51,7 +51,7 @@ void client_choice_screen()
 	printf("client need to display the choice screen\n");
 }
 
-void client_score_screen(bool has_win, int score) 
+void client_score_screen(bool has_win, int score)
 {
 	printf("client need to display the score screen, the client win : %d, score = %d\n", has_win, score);
 }
@@ -65,7 +65,7 @@ int main()
 	net_client_set_func_waiting_screen(client_waiting_screen);
 	net_client_set_func_choice_screen(client_choice_screen);
 	net_client_set_func_score_screen(client_score_screen);
-	
+
 	char *addrServer = "0.0.0.0";
 	net_server_init(addrServer, 7799);
 
@@ -73,7 +73,9 @@ int main()
 
 	net_server_wait();
 
-	while(1){};
+	while (1)
+	{
+	};
 
 	return (EXIT_SUCCESS);
 }

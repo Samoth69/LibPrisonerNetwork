@@ -169,13 +169,17 @@ void net_server_send_screen_choice(int client)
  * @param has_win should be true if this client has win
  * @param score Score for the client (this value isn't enforce, there may be
  * any value a int can handle)
+ * @param round_current current round
+ * @param round_total number of round for this party
  */
-void net_server_send_screen_score(int client, bool has_win, int score)
+void net_server_send_screen_score(int client, bool has_win, int score, int round_current, int round_total)
 {
     _net_common_netpacket msg;
-    msg.msg_type = SCREEN_SCORE;
-    msg.has_win = has_win;
-    msg.score = score;
+    msg.msg_type = SCREEN_SCORE_ROUND;
+    msg.round_score.round_has_win = has_win;
+    msg.round_score.player_score = score;
+    msg.round_score.round_actual = round_current;
+    msg.round_score.round_total = round_total;
     _net_server_send_message(&msg, client);
 }
 
@@ -373,8 +377,11 @@ void *_net_server_thread_process(void *ptr)
         case SCREEN_CHOICE:
             _net_common_dbg("ERROR: received SCREEN_CHOICE from client %d\n", connection->client_id);
             break;
-        case SCREEN_SCORE:
-            _net_common_dbg("ERROR: received SCREEN_SCORE from client %d\n", connection->client_id);
+        case SCREEN_SCORE_ROUND:
+            _net_common_dbg("ERROR: received SCREEN_SCORE_ROUND from client %d\n", connection->client_id);
+            break;
+        case SCREEN_SCORE_FINAL:
+            _net_common_dbg("ERROR: received SCREEN_SCORE_FINAL from client %d\n", connection->client_id);
             break;
         case INIT_CLIENT_ID:
             connection->client_id = packet.client_id;
