@@ -161,10 +161,11 @@ void net_server_send_screen_choice(int client)
     _net_server_send_message(&msg, client);
 }
 
+// TODO
 /**
  * @brief Send to specified client to switch to score screen
  * The client may show the given results
- * 
+ * @warning TODO
  * @param client client id
  * @param has_win should be true if this client has win
  * @param score Score for the client (this value isn't enforce, there may be

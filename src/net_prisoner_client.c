@@ -44,9 +44,16 @@ void (*_net_client_func_choice_screen)();
 /**
  * @brief the function used by the library
  * refering to the defined one by the client
- * to display the score screen
+ * to display the score screen of the round
  */
-void (*_net_client_func_score_screen)(_net_common_round_score);
+void (*_net_client_func_score_screen)(net_common_round_score);
+
+/**
+ * @brief the function used by the library
+ * refering to the defined one by the client
+ * to display the final score of the game
+ */
+void (*_net_client_func_score_final)(net_common_final_score);
 
 /**
  * @brief define the function using the defined
@@ -66,6 +73,16 @@ void *net_client_set_func_waiting_screen(void (*f)())
 void *net_client_set_func_choice_screen(void (*f)())
 {
     _net_client_func_choice_screen = f;
+}
+
+/**
+ * @brief define the function using the defined
+ * one by the client to display the score screen
+ * @param f the client function 
+ */
+void *net_client_set_func_score_final(void (*f)())
+{
+    _net_client_func_score_final = f;
 }
 
 /**
@@ -105,7 +122,7 @@ void _net_client_event(_net_common_netpacket packet)
 
     case SCREEN_SCORE_FINAL:
         _net_common_dbg("Client %d received SCREEN_SCORE_FINAL from server\n", net_client_id);
-        //(*_net_client_func_score_screen)(packet.final_score);
+        (*_net_client_func_score_final)(packet.final_score);
         break;
 
     default:
@@ -142,8 +159,6 @@ void *_net_client_threadProcess(void *ptr)
  */
 bool net_client_init(char *addrServer, int port, int client_id)
 {
-    net_client_id = client_id;
-
     struct sockaddr_in serverAddr;
     pthread_t thread;
 
@@ -172,16 +187,27 @@ bool net_client_init(char *addrServer, int port, int client_id)
     // init the client id
     _net_common_netpacket packet;
     packet.msg_type = INIT_CLIENT_ID;
-    packet.client_id = net_client_id;
+    packet.client_id = client_id;
     write(net_client_sockfd, &packet, sizeof(packet));
     _net_common_dbg("the client sent his id : %d\n", net_client_id);
-    
 
     // reading pthread creation
     pthread_create(&thread, 0, _net_client_threadProcess, &net_client_sockfd);
     pthread_detach(thread);
 
     return true;
+}
+
+/**
+ * @brief The client is ready for the next round
+ */
+void net_client_ready()
+{
+    _net_common_netpacket packet;
+    packet.msg_type = ACTION_READY;
+    packet.client_id = net_client_id;
+    write(net_client_sockfd, &packet, sizeof(packet));
+    _net_common_dbg("%d is ready\n", net_client_id);
 }
 
 /**
