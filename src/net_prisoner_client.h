@@ -61,7 +61,7 @@ void * net_client_set_func_score_screen(void (*f)());
  * @param addrServer server address IP
  * @param port server port
  */
-void net_client_init(char *addrServer, int port, int client_id);
+bool net_client_init(char *addrServer, int port, int client_id);
 
 /**
  * @brief The client want to betray the other player

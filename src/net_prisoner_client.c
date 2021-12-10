@@ -46,7 +46,7 @@ void (*_net_client_func_choice_screen)();
  * refering to the defined one by the client
  * to display the score screen
  */
-void (*_net_client_func_score_screen)(bool, int);
+void (*_net_client_func_score_screen)(_net_common_round_score);
 
 /**
  * @brief define the function using the defined
@@ -89,18 +89,23 @@ void _net_client_event(_net_common_netpacket packet)
     switch (packet.msg_type)
     {
     case SCREEN_WAITING:
-        _net_common_dbg("Client socket %d received SCREEN_WAITING from server\n", net_client_sockfd);
+        _net_common_dbg("Client %d received SCREEN_WAITING from server\n", net_client_id);
         (*_net_client_func_waiting_screen)();
         break;
 
     case SCREEN_CHOICE:
-        _net_common_dbg("Client socket %d received SCREEN_CHOICE from server\n", net_client_sockfd);
+        _net_common_dbg("Client %d received SCREEN_CHOICE from server\n", net_client_id);
         (*_net_client_func_choice_screen)();
         break;
 
-    case SCREEN_SCORE:
-        _net_common_dbg("Client socket %d received SCREEN_SCORE from server\n", net_client_sockfd);
-        (*_net_client_func_score_screen)(packet.has_win, packet.score);
+    case SCREEN_SCORE_ROUND:
+        _net_common_dbg("Client %d received SCREEN_SCORE_ROUND from server\n", net_client_id);
+        (*_net_client_func_score_screen)(packet.round_score);
+        break;
+
+    case SCREEN_SCORE_FINAL:
+        _net_common_dbg("Client %d received SCREEN_SCORE_FINAL from server\n", net_client_id);
+        //(*_net_client_func_score_screen)(packet.final_score);
         break;
 
     default:
@@ -135,7 +140,7 @@ void *_net_client_threadProcess(void *ptr)
  * @param addrServer server address IP
  * @param port server port
  */
-void net_client_init(char *addrServer, int port, int client_id)
+bool net_client_init(char *addrServer, int port, int client_id)
 {
     struct sockaddr_in serverAddr;
     pthread_t thread;
@@ -159,7 +164,7 @@ void net_client_init(char *addrServer, int port, int client_id)
     if (connect(net_client_sockfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) != 0)
     {
         _net_common_dbg("\nFail to connect to server\n");
-        exit(-1);
+        return false;
     };
 
     // init the client id
@@ -172,6 +177,8 @@ void net_client_init(char *addrServer, int port, int client_id)
     // reading pthread creation
     pthread_create(&thread, 0, _net_client_threadProcess, &net_client_sockfd);
     pthread_detach(thread);
+
+    return true;
 }
 
 /**

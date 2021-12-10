@@ -19,7 +19,7 @@ void new_client(int client_id)
 	printf("new_client: %d (id: %d)\n", counter, client_id);
 
 	// envoie d'un message
-	net_client_betray();
+	net_client_betray(10);
 
 	net_server_send_screen_choice(0);
 	net_server_send_screen_waiting(0);
@@ -69,7 +69,7 @@ int main()
 	
 	char *addrServer = "0.0.0.0";
 	net_server_init(addrServer, 7799);
-	net_client_init(addrServer, 7799);
+	bool ret = net_client_init(addrServer, 7799, 1);
 
 	net_server_wait();
 
