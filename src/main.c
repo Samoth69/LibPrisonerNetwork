@@ -22,7 +22,8 @@ void new_client(int client_id)
 	net_client_betray(10);
 	net_server_send_screen_choice(432);
 	net_server_send_screen_waiting(432);
-	net_server_send_screen_score(432, true, 42, 3, 5);
+	net_server_send_screen_score_round(432, true, 42, 3, 5);
+	net_server_send_screen_score_final(432, NULL);
 }
 
 void client_disconnecting(int client_id)
@@ -69,12 +70,14 @@ int main()
 	char *addrServer = "0.0.0.0";
 	net_server_init(addrServer, 7799);
 
-	bool ret = net_client_init(addrServer, 7799, 1);
+	bool ret = net_client_init(addrServer, 7799, 432);
 
 	net_server_wait();
 
 	while (1)
 	{
+		//provent high cpu usage
+		sleep(1);
 	};
 
 	return (EXIT_SUCCESS);

@@ -172,7 +172,7 @@ void net_server_send_screen_choice(int client)
  * @param round_current current round
  * @param round_total number of round for this party
  */
-void net_server_send_screen_score(int client, bool has_win, int score, int round_current, int round_total)
+void net_server_send_screen_score_round(int client, bool has_win, int score, int round_current, int round_total)
 {
     _net_common_netpacket msg;
     msg.msg_type = SCREEN_SCORE_ROUND;
@@ -180,6 +180,19 @@ void net_server_send_screen_score(int client, bool has_win, int score, int round
     msg.round_score.player_score = score;
     msg.round_score.round_actual = round_current;
     msg.round_score.round_total = round_total;
+    _net_server_send_message(&msg, client);
+}
+
+/**
+ * @brief Send screen score final message
+ * 
+ * @param client client id
+ * @param result double pointer to result array
+ */
+void net_server_send_screen_score_final(int client, int **result)
+{
+    _net_common_netpacket msg;
+    msg.msg_type = SCREEN_SCORE_FINAL;
     _net_server_send_message(&msg, client);
 }
 

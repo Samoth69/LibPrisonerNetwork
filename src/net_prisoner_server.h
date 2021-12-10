@@ -130,7 +130,18 @@ void net_server_send_screen_choice(int client);
  * @param has_win true if the client has winned, false otherwise
  * @param score 
  */
-void net_server_send_screen_score(int client, bool has_win, int score, int round_current, int round_total);
+void net_server_send_screen_score_round(int client, bool has_win, int score, int round_current, int round_total);
+
+/**
+ * @brief Send the final results to the client
+ * 
+ * @param client client id
+ * @param result dual dimension array
+ * first dimension is the round list
+ *  second dimension should contain result for each round,
+ *  with client A and B answers (this arg can be null)
+ */
+void net_server_send_screen_score_final(int client, int **result);
 
 //private
 void _net_server_connection_add(_net_server_connection_t *connection);
