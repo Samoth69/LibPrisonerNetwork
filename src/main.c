@@ -57,6 +57,10 @@ void client_score_screen(bool has_win, int score)
 	printf("client need to display the score screen, the client win : %d, score = %d\n", has_win, score);
 }
 
+void client_score_final_screen() {
+	printf("Client need to display score FINAL screen\n");
+}
+
 int main()
 {
 	net_server_set_func_new_client(new_client);
@@ -66,6 +70,7 @@ int main()
 	net_client_set_func_waiting_screen(client_waiting_screen);
 	net_client_set_func_choice_screen(client_choice_screen);
 	net_client_set_func_score_screen(client_score_screen);
+	net_client_set_func_score_final(client_score_final_screen);
 
 	char *addrServer = "0.0.0.0";
 	net_server_init(addrServer, 7799);
