@@ -35,3 +35,6 @@ doxygen
 # test des fonctionnalités de la lib.
 # il ne servira pas en prod
 main.c
+
+# personnal file note
+notes.md
