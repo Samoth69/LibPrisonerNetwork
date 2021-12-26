@@ -85,49 +85,49 @@ enum _net_common_msg_type {
     /**
      * @brief the client betray the other
      */
-    ACTION_BETRAY = 0,
+    NET_ACTION_BETRAY = 0,
     
     /**
      * @brief the client collab with the other
      */
-    ACTION_COLLAB = 1,
+    NET_ACTION_COLLAB = 1,
     
     /**
      * @brief the client quit the game
      */
-    ACTION_QUIT = 2,
+    NET_ACTION_QUIT = 2,
     
     /**
      * @brief the client need to display the waiting screen before the game start
      */
-    SCREEN_WAITING = 4,
+    NET_SCREEN_WAITING = 4,
     
     /**
      * @brief the client need to make a choice
      */
-    SCREEN_CHOICE = 5,
+    NET_SCREEN_CHOICE = 5,
     
     /**
      * @brief the client need to display the round result
      */
-    SCREEN_SCORE_ROUND = 6,
+    NET_SCREEN_SCORE_ROUND = 6,
 
     /**
      * @brief the client sent his id just after
      * initialising the connection with the server
      */
-    INIT_CLIENT_ID = 7,
+    NET_INIT_CLIENT_ID = 7,
 
     /**
      * @brief the client need to display the final result
      */
-    SCREEN_SCORE_FINAL = 8,
+    NET_SCREEN_SCORE_FINAL = 8,
 
     /**
      * @brief The client may send this to client to indicate that he (the client) is
      * ready to make a choice
      */
-    ACTION_READY = 9
+    NET_ACTION_READY = 9
 };
 
 /**
@@ -138,12 +138,12 @@ enum _net_common_client_action {
     /**
      * @brief the player collab
      */
-    COLLABORATE = 0,
+    NET_COLLABORATE = 0,
 
     /**
      * @brief the player betray the other
      */
-    BETRAY = 1
+    NET_BETRAY = 1
 };
 
 /**

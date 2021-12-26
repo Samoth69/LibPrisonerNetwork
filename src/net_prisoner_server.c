@@ -145,7 +145,7 @@ void net_server_set_func_betray(void (*f)(int, ulong))
 void net_server_send_screen_waiting(int client)
 {
     _net_common_netpacket msg;
-    msg.msg_type = SCREEN_WAITING;
+    msg.msg_type = NET_SCREEN_WAITING;
     _net_server_send_message(&msg, client);
 }
 
@@ -157,7 +157,7 @@ void net_server_send_screen_waiting(int client)
 void net_server_send_screen_choice(int client)
 {
     _net_common_netpacket msg;
-    msg.msg_type = SCREEN_CHOICE;
+    msg.msg_type = NET_SCREEN_CHOICE;
     _net_server_send_message(&msg, client);
 }
 
@@ -176,7 +176,7 @@ void net_server_send_screen_choice(int client)
 void net_server_send_screen_score_round(int client, bool has_win, int score, int round_current, int round_total)
 {
     _net_common_netpacket msg;
-    msg.msg_type = SCREEN_SCORE_ROUND;
+    msg.msg_type = NET_SCREEN_SCORE_ROUND;
     msg.round_score.round_has_win = has_win;
     msg.round_score.player_score = score;
     msg.round_score.round_actual = round_current;
@@ -193,7 +193,7 @@ void net_server_send_screen_score_round(int client, bool has_win, int score, int
 void net_server_send_screen_score_final(int client, int **result)
 {
     _net_common_netpacket msg;
-    msg.msg_type = SCREEN_SCORE_FINAL;
+    msg.msg_type = NET_SCREEN_SCORE_FINAL;
     _net_server_send_message(&msg, client);
 }
 
@@ -372,34 +372,34 @@ void *_net_server_thread_process(void *ptr)
 
         switch (packet.msg_type)
         {
-        case ACTION_BETRAY:
-            _net_common_dbg("received ACTION_BETRAY from client %d\n", connection->client_id);
+        case NET_ACTION_BETRAY:
+            _net_common_dbg("received NET_ACTION_BETRAY from client %d\n", connection->client_id);
             _net_server_call_betray(connection->client_id, packet.delay);
             break;
-        case ACTION_COLLAB:
-            _net_common_dbg("received ACTION_COLLAB from client %d\n", connection->client_id);
+        case NET_ACTION_COLLAB:
+            _net_common_dbg("received NET_ACTION_COLLAB from client %d\n", connection->client_id);
             _net_server_call_cooperate(connection->client_id, packet.delay);
             break;
-        case ACTION_QUIT:
-            _net_common_dbg("received ACTION_QUIT from client %d\n", connection->client_id);
+        case NET_ACTION_QUIT:
+            _net_common_dbg("received NET_ACTION_QUIT from client %d\n", connection->client_id);
             _net_server_func_client_disconnect(connection->client_id);
             net_server_stop();
             break;
-        case SCREEN_WAITING:
-            _net_common_dbg("ERROR: received SCREEN_WAITING from client %d\n", connection->client_id);
+        case NET_SCREEN_WAITING:
+            _net_common_dbg("ERROR: received NET_SCREEN_WAITING from client %d\n", connection->client_id);
             break;
-        case SCREEN_CHOICE:
-            _net_common_dbg("ERROR: received SCREEN_CHOICE from client %d\n", connection->client_id);
+        case NET_SCREEN_CHOICE:
+            _net_common_dbg("ERROR: received NET_SCREEN_CHOICE from client %d\n", connection->client_id);
             break;
-        case SCREEN_SCORE_ROUND:
-            _net_common_dbg("ERROR: received SCREEN_SCORE_ROUND from client %d\n", connection->client_id);
+        case NET_SCREEN_SCORE_ROUND:
+            _net_common_dbg("ERROR: received NET_SCREEN_SCORE_ROUND from client %d\n", connection->client_id);
             break;
-        case SCREEN_SCORE_FINAL:
-            _net_common_dbg("ERROR: received SCREEN_SCORE_FINAL from client %d\n", connection->client_id);
+        case NET_SCREEN_SCORE_FINAL:
+            _net_common_dbg("ERROR: received NET_SCREEN_SCORE_FINAL from client %d\n", connection->client_id);
             break;
-        case INIT_CLIENT_ID:
+        case NET_INIT_CLIENT_ID:
             connection->client_id = packet.client_id;
-            _net_common_dbg("Received INIT_CLIENT_ID from client %d\n", connection->client_id);
+            _net_common_dbg("Received NET_INIT_CLIENT_ID from client %d\n", connection->client_id);
             _net_server_call_new_client(connection->client_id);
             break;
 

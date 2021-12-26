@@ -115,31 +115,31 @@ void _net_client_event(_net_common_netpacket packet)
 
     switch (packet.msg_type)
     {
-    case SCREEN_WAITING:
-        _net_common_dbg("Client %d received SCREEN_WAITING from server\n", net_client_id);
+    case NET_SCREEN_WAITING:
+        _net_common_dbg("Client %d received NET_SCREEN_WAITING from server\n", net_client_id);
         (*_net_client_func_waiting_screen)();
         break;
 
-    case SCREEN_CHOICE:
-        _net_common_dbg("Client %d received SCREEN_CHOICE from server\n", net_client_id);
+    case NET_SCREEN_CHOICE:
+        _net_common_dbg("Client %d received NET_SCREEN_CHOICE from server\n", net_client_id);
         (*_net_client_func_choice_screen)();
         break;
 
-    case SCREEN_SCORE_ROUND:
-        _net_common_dbg("Client %d received SCREEN_SCORE_ROUND from server\n", net_client_id);
+    case NET_SCREEN_SCORE_ROUND:
+        _net_common_dbg("Client %d received NET_SCREEN_SCORE_ROUND from server\n", net_client_id);
         (*_net_client_func_score_round)(packet.round_score);
         break;
 
-    case SCREEN_SCORE_FINAL:
-        _net_common_dbg("Client %d received SCREEN_SCORE_FINAL from server\n", net_client_id);
+    case NET_SCREEN_SCORE_FINAL:
+        _net_common_dbg("Client %d received NET_SCREEN_SCORE_FINAL from server\n", net_client_id);
         (*_net_client_func_score_final)(packet.final_score);
         break;
 
-    case ACTION_BETRAY:
-    case ACTION_COLLAB:
-    case ACTION_QUIT:
-    case INIT_CLIENT_ID:
-    case ACTION_READY:
+    case NET_ACTION_BETRAY:
+    case NET_ACTION_COLLAB:
+    case NET_ACTION_QUIT:
+    case NET_INIT_CLIENT_ID:
+    case NET_ACTION_READY:
         _net_common_dbg("Server error: client don't have to receive this message\n");
         break;
 
@@ -208,7 +208,7 @@ bool net_client_init(char *addrServer, int port, int client_id)
 
     // init the client id
     _net_common_netpacket packet;
-    packet.msg_type = INIT_CLIENT_ID;
+    packet.msg_type = NET_INIT_CLIENT_ID;
     packet.client_id = client_id;
     write(net_client_sockfd, &packet, sizeof(packet));
     _net_common_dbg("the client sent his id : %d\n", net_client_id);
@@ -226,7 +226,7 @@ bool net_client_init(char *addrServer, int port, int client_id)
 void net_client_ready()
 {
     _net_common_netpacket packet;
-    packet.msg_type = ACTION_READY;
+    packet.msg_type = NET_ACTION_READY;
     packet.client_id = net_client_id;
     write(net_client_sockfd, &packet, sizeof(packet));
     _net_common_dbg("%d is ready\n", net_client_id);
@@ -238,7 +238,7 @@ void net_client_ready()
 void net_client_betray(ulong delay)
 {
     _net_common_netpacket packet;
-    packet.msg_type = ACTION_BETRAY;
+    packet.msg_type = NET_ACTION_BETRAY;
     packet.client_id = net_client_id;
     packet.delay = delay;
     write(net_client_sockfd, &packet, sizeof(packet));
@@ -251,7 +251,7 @@ void net_client_betray(ulong delay)
 void net_client_collab(ulong delay)
 {
     _net_common_netpacket packet;
-    packet.msg_type = ACTION_COLLAB;
+    packet.msg_type = NET_ACTION_COLLAB;
     packet.client_id = net_client_id;
     packet.delay = delay;
     write(net_client_sockfd, &packet, sizeof(packet));
@@ -264,7 +264,7 @@ void net_client_collab(ulong delay)
 void net_client_disconnect(ulong delay)
 {
     _net_common_netpacket packet;
-    packet.msg_type = ACTION_QUIT;
+    packet.msg_type = NET_ACTION_QUIT;
     packet.client_id = net_client_id;
     packet.delay = delay;
     write(net_client_sockfd, &packet, sizeof(packet));
