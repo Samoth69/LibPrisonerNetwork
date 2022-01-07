@@ -436,7 +436,7 @@ void _net_server_send_message(_net_common_netpacket *msg, int client_id)
         if (_connections[i] != NULL && _connections[i]->client_id == client_id)
         {
             _net_common_dbg("sending msg_type%d to client #%d\n", msg->msg_type, client_id);
-            write(_connections[i]->sockfd, msg, sizeof(msg));
+            write(_connections[i]->sockfd, msg, sizeof(*msg));
             found = true;
         }
     }
